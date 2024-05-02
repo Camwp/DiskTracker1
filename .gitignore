@@ -1,0 +1,4 @@
+/node_modules
+/db
+/db/database.sqlite
+/db/sessions.db

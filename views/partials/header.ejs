@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css"> <!-- Your custom styles if any -->
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Disc Golf Inventory</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a href="/" class="nav-link">Home</a>
+                    </li>
+                    <% if (user) { %>
+                        <li class="nav-item">
+                            <a href="/profile" class="nav-link">Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/disc-management" class="nav-link">Disc Management</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/logout" class="nav-link">Logout</a>
+                        </li>
+                        <% } else { %>
+                            <!-- Modal Trigger Button -->
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#authModal">
+                                Login / Register
+                            </button>
+
+                            <!-- Authentication Modal -->
+                            <div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel"
+                                aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="authModalLabel">Login</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- Login Form -->
+                                            <form id="loginForm" style="display: block;">
+                                                <div class="mb-3">
+                                                    <label for="loginEmail" class="form-label">Email address</label>
+                                                    <input type="email" class="form-control" id="loginEmail" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="loginPassword" class="form-label">Password</label>
+                                                    <input type="password" class="form-control" id="loginPassword"
+                                                        required>
+                                                </div>
+                                                <label>
+                                                    <input type="checkbox" name="remember"> Remember me
+                                                </label>
+                                                <button type="submit" class="btn btn-primary">Login</button>
+                                            </form>
+                                            <!-- Registration Form (initially hidden) -->
+                                            <form id="registerForm" action="/register" method="POST"
+                                                style="display:none;">
+                                                <div class="mb-3">
+                                                    <label for="registerUsername" class="form-label">Username</label>
+                                                    <input type="text" class="form-control" id="registerUsername"
+                                                        name="username" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="registerEmail" class="form-label">Email address</label>
+                                                    <input type="email" class="form-control" id="registerEmail"
+                                                        name="email" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="registerPassword" class="form-label">Password</label>
+                                                    <input type="password" class="form-control" id="registerPassword"
+                                                        name="password" required>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary">Register</button>
+                                            </form>
+
+                                            <!-- Toggle Link -->
+                                            <p class="text-center mt-4">
+                                                <a href="#" id="toggleForm">Don't have an account? Sign up</a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <% } %>
+                                <script>
+                                    document.addEventListener("DOMContentLoaded", function () {
+                                        const toggleFormLink = document.getElementById('toggleForm');
+                                        const loginForm = document.getElementById('loginForm');
+                                        const registerForm = document.getElementById('registerForm');
+                                        const modalTitle = document.getElementById('authModalLabel');
+
+                                        toggleFormLink.addEventListener('click', function (event) {
+                                            event.preventDefault();
+                                            if (loginForm.style.display === 'block') {
+                                                loginForm.style.display = 'none';
+                                                registerForm.style.display = 'block';
+                                                modalTitle.textContent = 'Register';
+                                                toggleFormLink.textContent = 'Already have an account? Log in';
+                                            } else {
+                                                loginForm.style.display = 'block';
+                                                registerForm.style.display = 'none';
+                                                modalTitle.textContent = 'Login';
+                                                toggleFormLink.textContent = "Don't have an account? Sign up";
+                                            }
+                                        });
+                                    });
+
+                                    document.getElementById('loginForm').addEventListener('submit', function (event) {
+                                        event.preventDefault();
+                                        const email = document.getElementById('loginEmail').value;
+                                        const password = document.getElementById('loginPassword').value;
+                                        const remember = document.querySelector('[name="remember"]').checked; // Get the "Remember me" checkbox status
+
+                                        fetch('/login', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ email: email, password: password, remember: remember })
+                                        })
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                if (data.error) {
+                                                    alert(data.error);
+                                                } else {
+                                                    console.log('Login successful, redirecting...');
+                                                    window.location.href = data.redirect;
+                                                }
+                                            })
+                                            .catch(error => console.error('Error logging in:', error));
+                                    });
+
+
+
+                                </script>
+
+                </ul>
+            </div>
+        </div>
+    </nav>

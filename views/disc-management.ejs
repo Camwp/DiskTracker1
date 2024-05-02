@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disc Management</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <%- include('partials/header', { title: 'Disc Management' , user: user }) %>
+
+        <div class="container mt-3">
+            <h1>Disc Management</h1>
+            <div class="mb-3">
+                <button class="btn btn-primary" id="addDiscBtn">Add Disc</button>
+                <button class="btn btn-secondary" id="bulkAddDiscBtn">Add Bulk Discs</button>
+            </div>
+            <div id="discList">
+                <% if (discs && discs.length> 0) { %>
+                    <% discs.forEach(disc=> { %>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <img src="<%= disc.imageUrl || 'path/to/default/image.jpg' %>" alt="Disc Image"
+                                    class="img-thumbnail">
+                            </div>
+                            <div class="col-md-8">
+                                <p><strong>Name:</strong>
+                                    <%= disc.name %>
+                                </p>
+                                <p><strong>Type:</strong>
+                                    <%= disc.plastic_type %>
+                                </p>
+                                <p><strong>Weight:</strong>
+                                    <%= disc.weight %> grams
+                                </p>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-info">Check Out</button>
+                            </div>
+                        </div>
+                        <% }); %>
+                            <% } else { %>
+                                <p>No discs found.</p>
+                                <% } %>
+            </div>
+
+            <style>
+                .row {
+                    cursor: pointer;
+                    transition: background-color 0.2s;
+                }
+
+                .row:hover {
+                    background-color: #f0f0f0;
+                }
+            </style>
+        </div>
+
+
+        <%- include('partials/footer') %>
+
+</body>
+<script src="/js/discManagement.js"></script>
+
+</html>
