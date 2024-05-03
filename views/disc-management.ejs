@@ -18,12 +18,19 @@
                 <button class="btn btn-primary" id="addDiscBtn">Add Disc</button>
                 <button class="btn btn-secondary" id="bulkAddDiscBtn">Add Bulk Discs</button>
             </div>
+            <!-- Add a filter button in your HTML -->
+            <div class="mb-3">
+                <button class="btn btn-primary" onclick="window.location.href = '/disc-management'">All Discs</button>
+                <button class="btn btn-success" onclick="window.location.href = '/disc-management?checkedOut=true'">View
+                    Checked Out Discs</button>
+            </div>
+
             <div id="discList">
                 <% if (discs && discs.length> 0) { %>
                     <% discs.forEach(disc=> { %>
-                        <div class="row mb-2">
+                        <div class="row mb-2" data-disc-id="<%= disc.id %>">
                             <div class="col-md-2">
-                                <img src="<%= disc.imageUrl || 'path/to/default/image.jpg' %>" alt="Disc Image"
+                                <img src="<%= disc.imageUrl || '/uploads/defaultDiscImage.png' %>" alt="Disc Image"
                                     class="img-thumbnail">
                             </div>
                             <div class="col-md-8">
@@ -38,7 +45,10 @@
                                 </p>
                             </div>
                             <div class="col-md-2">
-                                <button class="btn btn-info">Check Out</button>
+                                <button class="btn btn-info checkout-btn" data-disc-id="<%= disc.id %>">
+                                    <%= disc.checked_out ? 'Check In' : 'Check Out' %>
+                                </button>
+
                             </div>
                         </div>
                         <% }); %>
@@ -47,20 +57,9 @@
                                 <% } %>
             </div>
 
-            <style>
-                .row {
-                    cursor: pointer;
-                    transition: background-color 0.2s;
-                }
-
-                .row:hover {
-                    background-color: #f0f0f0;
-                }
-            </style>
-        </div>
 
 
-        <%- include('partials/footer') %>
+            <%- include('partials/footer') %>
 
 </body>
 <script src="/js/discManagement.js"></script>

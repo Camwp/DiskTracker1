@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Disc</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@sindresorhus/color-average"></script>
+</head>
+
+<body>
+    <%- include('partials/header', { title: 'Add Disc' , user: user }) %>
+
+        <div class="container mt-3">
+            <h1>Add New Disc</h1>
+            <form action="/add-disc" method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Disc Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="weight" class="form-label">Weight (<span id="weightValue">250</span> grams)</label>
+                    <input type="range" class="form-range" id="weight" name="weight" min="100" max="500" value="101"
+                        oninput="updateSliderValue(this.id, this.value)">
+                </div>
+                <div class=" mb-3">
+                    <label for="plastic_type" class="form-label">Plastic Type</label>
+                    <input type="text" class="form-control" id="plastic_type" name="plastic_type" required>
+                </div>
+                <div class=" mb-3">
+                    <label for="range_type" class="form-label">Range Type</label>
+                    <select class="form-control" id="range_type" name="range_type">
+                        <option value="Approach">Approach</option>
+                        <option value="Putter">Putter</option>
+                        <option value="Mid-Range">Mid-Range</option>
+                        <option value="Distance Driver">Distance Driver</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="stability">Stability</label>
+                    <select class="form-control" id="stability" name="stability">
+                        <option value="Under-Stable">Under-Stable</option>
+                        <option value="Stable">Stable</option>
+                        <option value="Over-Stable">Over-Stable</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="speed">Speed (<span id="speedValue">1</span>)</label>
+                    <input type="range" class="form-range" id="speed" name="speed" min="1" max="14" value="1"
+                        oninput="updateSliderValue(this.id, this.value)">
+                </div>
+                <div class="mb-3">
+                    <label for="glide">Glide (<span id="glideValue">1</span>)</label>
+                    <input type="range" class="form-range" id="glide" name="glide" min="1" max="7" value="1"
+                        oninput="updateSliderValue(this.id, this.value)">
+                </div>
+                <div class="mb-3">
+                    <label for="turn">Turn (<span id="turnValue">-1</span>)</label>
+                    <input type="range" class="form-range" id="turn" name="turn" min="-5" max="1" value="-1"
+                        oninput="updateSliderValue(this.id, this.value)">
+                </div>
+                <div class="mb-3">
+                    <label for="fade">Fade (<span id="fadeValue">0</span>)</label>
+                    <input type="range" class="form-range" id="fade" name="fade" min="0" max="5" value="0"
+                        oninput="updateSliderValue(this.id, this.value)">
+                </div>
+                <div class="mb-3">
+                    <label for="color" class="form-label">Color</label>
+                    <input type="color" class="form-control form-control-color" id="color" name="color" value="#ff0000">
+                </div>
+                <div class="mb-3">
+                    <label for="discImage" class="form-label">Disc Image</label>
+                    <input type="file" class="form-control" id="discImage" name="discImage" onchange="previewImage();">
+                </div>
+                <div class="mb-3" id="imagePreview">
+                    <img src="" alt="Image Preview" id="imagePreviewSrc" style="max-width: 100%;">
+                </div>
+                <button type="submit" class="btn btn-primary">Add Disc</button>
+            </form>
+        </div>
+
+        <script>
+            function updateSliderValue(id, value) {
+                document.getElementById(id + 'Value').innerText = value;
+            }
+            function previewImage() {
+                const file = document.getElementById('discImage').files[0];
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const imgElement = document.createElement('img');
+                    imgElement.src = e.target.result;
+                    imgElement.onload = function () {
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.width = imgElement.width;
+                        canvas.height = imgElement.height;
+                        context.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
+                        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                        const color = colorAverage(imageData.data);
+                        document.getElementById('color').value = color;
+                        document.getElementById('imagePreviewSrc').src = e.target.result; // Update the image preview
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function colorAverage(data) {
+                let r = 0, g = 0, b = 0, count = 0;
+                for (let i = 0; i < data.length; i += 4) {
+                    r += data[i];
+                    g += data[i + 1];
+                    b += data[i + 2];
+                    count++;
+                }
+                r = Math.floor(r / count);
+                g = Math.floor(g / count);
+                b = Math.floor(b / count);
+                return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+            }
+        </script>
+
+        <%- include('partials/footer') %>
+</body>
+
+</html>

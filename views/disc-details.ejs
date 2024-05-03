@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disc Details</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <%- include('partials/header', { title: 'Disc Details' , user: user }) %>
+
+        <div class="container mt-3">
+            <h1>Disc Details</h1>
+            <img src="<%= disc.imageUrl %>" alt="Disc Image" class="img-thumbnail" id="discImageDisplay">
+            <input type="file" id="discImage" name="discImage" accept="image/*" style="display: none;">
+            <button type="button" class="btn btn-primary" id="uploadImageButton" style="display: none;">Upload
+                Image</button>
+
+            <form action="/update-disc/<%= disc.id %>" method="post">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="name" name="name" value="<%= disc.name %>" required>
+                </div>
+                <div class="mb-3">
+                    <label for="weight" class="form-label">Weight</label>
+                    <input type="number" class="form-control" id="weight" name="weight" value="<%= disc.weight %>"
+                        required>
+                </div>
+                <div class="mb-3">
+                    <label for="plastic_type" class="form-label">Plastic Type</label>
+                    <input type="text" class="form-control" id="plastic_type" name="plastic_type"
+                        value="<%= disc.plastic_type %>" required>
+                </div>
+                <div class="mb-3">
+                    <label for="speed" class="form-label">Speed</label>
+                    <input type="number" class="form-control" id="speed" name="speed" value="<%= disc.speed %>"
+                        required>
+                </div>
+                <div class="mb-3">
+                    <label for="glide" class="form-label">Glide</label>
+                    <input type="number" class="form-control" id="glide" name="glide" value="<%= disc.glide %>"
+                        required>
+                </div>
+                <div class="mb-3">
+                    <label for="turn" class="form-label">Turn</label>
+                    <input type="number" class="form-control" id="turn" name="turn" value="<%= disc.turn %>" required>
+                </div>
+                <div class="mb-3">
+                    <label for="fade" class="form-label">Fade</label>
+                    <input type="number" class="form-control" id="fade" name="fade" value="<%= disc.fade %>" required>
+                </div>
+                <div class="mb-3">
+                    <label for="color" class="form-label">Color</label>
+                    <input type="color" class="form-control form-control-color" id="color" name="color"
+                        value="<%= disc.color %>" required>
+                </div>
+                <button type="button" class="btn btn-primary" id="editButton">Edit</button>
+                <button type="submit" class="btn btn-success" id="saveButton" style="display: none;">Save
+                    Changes</button>
+
+            </form>
+        </div>
+
+        <%- include('partials/footer') %>
+            <script>
+                function updateValue(id, value) {
+                    document.getElementById(id).textContent = value;
+                }
+
+                document.getElementById('editButton').addEventListener('click', function () {
+                    const formElements = document.querySelectorAll('#discDetailsForm input, #discDetailsForm select');
+                    formElements.forEach(element => element.disabled = false);
+                    document.getElementById('saveButton').style.display = 'block';
+                    this.style.display = 'none';
+                });
+
+                document.getElementById('discDetailsForm').addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    const formData = new FormData(this);
+                    fetch(`/update-disc/<%= disc.id %>`, {
+                        method: 'POST',
+                        body: formData
+                    }).then(response => {
+                        if (!response.ok) throw new Error('Failed to update disc');
+                        return response.json();
+                    }).then(data => {
+                        alert('Disc updated successfully!');
+                        window.location.reload();
+                    }).catch(error => {
+                        console.error('Error updating disc:', error);
+                        alert('Error updating disc.');
+                    });
+                });
+            </script>
+            <script>
+                document.getElementById('discImageDisplay').addEventListener('click', function () {
+                    document.getElementById('discImage').click();
+                });
+
+                document.getElementById('discImage').addEventListener('change', function () {
+                    if (this.files && this.files[0]) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            document.getElementById('discImageDisplay').src = e.target.result;
+                            document.getElementById('uploadImageButton').style.display = 'block';
+                        };
+                        reader.readAsDataURL(this.files[0]);
+                    }
+                });
+
+                document.getElementById('uploadImageButton').addEventListener('click', function () {
+                    const formData = new FormData();
+                    const discId = '<%= disc.id %>';
+                    formData.append('discImage', document.getElementById('discImage').files[0]);
+
+                    fetch('/update-disc-image/' + discId, {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                document.getElementById('uploadImageButton').style.display = 'none';
+                            } else {
+                                alert('Failed to update image.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error updating disc image:', error);
+                            alert('Error updating disc image.');
+                        });
+                });
+            </script>
+</body>
+
+</html>
