@@ -1,0 +1,166 @@
+/* Custom Overrides for Bootstrap Colors */
+/* Adjust the hex values as needed to fit your color scheme */
+:root {
+    /* Primary color across the site */
+    --bs-primary: #2675b1;
+    /* Blue */
+    --bs-primary-rgb: 0, 123, 255;
+
+    /* Secondary color */
+    --bs-secondary: #6c757d;
+    /* Gray */
+    --bs-secondary-rgb: 108, 117, 125;
+
+    /* Success color */
+    --bs-success: #28a745;
+    /* Green */
+    --bs-success-rgb: 40, 167, 69;
+
+    /* Danger color */
+    --bs-danger: #dc3545;
+    /* Red */
+    --bs-danger-rgb: 220, 53, 69;
+
+    /* Warning color */
+    --bs-warning: #ffc107;
+    /* Yellow */
+    --bs-warning-rgb: 255, 193, 7;
+
+    /* Info color */
+    --bs-info: #17a2b8;
+    /* Cyan */
+    --bs-info-rgb: 23, 162, 184;
+
+    /* Light color */
+    --bs-light: #f8f9fa;
+    /* Light gray */
+    --bs-light-rgb: 248, 249, 250;
+
+    /* Dark color */
+    --bs-dark: #343a40;
+    /* Dark gray */
+    --bs-dark-rgb: 52, 58, 64;
+
+    /* Background color */
+    --bs-body-bg: #fff;
+    /* White */
+    --bs-body-color: #212529;
+    /* Black-ish */
+}
+
+.bg-primary {
+    background-color: var(--bs-primary) !important;
+    /* Ensure it overrides the default */
+}
+
+/* Links */
+a,
+a:hover,
+a:focus {
+    color: #007bff;
+    /* Change to your preferred color */
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #007bff;
+    /* Primary button background */
+    border-color: #0056b3;
+    /* Primary button border */
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: #0056b3;
+    /* Darker shade for hover/focus */
+    border-color: #004085;
+    /* Corresponding darker border */
+}
+
+/* Navbar */
+.navbar-dark .navbar-nav .nav-link {
+    color: #ffffff;
+    /* Navbar links color */
+}
+
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-nav .nav-link:focus {
+    color: #cccccc;
+    /* Navbar links hover/focus color */
+}
+
+.navbar-dark .navbar-brand {
+    color: #ffffff;
+    /* Navbar brand color */
+}
+
+.navbar-dark .navbar-brand:hover,
+.navbar-dark .navbar-brand:focus {
+    color: #cccccc;
+    /* Navbar brand hover/focus color */
+}
+
+/* Custom navbar background color */
+/* Custom Overrides for Bootstrap Colors */
+/* Adjust the hex values as needed to fit your color scheme */
+
+/* Links */
+a,
+a:hover,
+a:focus {
+    color: #007bff;
+    /* Change to your preferred color */
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #007bff;
+    /* Primary button background */
+    border-color: #0056b3;
+    /* Primary button border */
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: #0056b3;
+    /* Darker shade for hover/focus */
+    border-color: #004085;
+    /* Corresponding darker border */
+}
+
+/* Navbar */
+.navbar-dark .navbar-nav .nav-link {
+    color: #ffffff;
+    /* Navbar links color */
+}
+
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-nav .nav-link:focus {
+    color: #cccccc;
+    /* Navbar links hover/focus color */
+}
+
+.navbar-dark .navbar-brand {
+    color: #ffffff;
+    /* Navbar brand color */
+}
+
+.navbar-dark .navbar-brand:hover,
+.navbar-dark .navbar-brand:focus {
+    color: #cccccc;
+    /* Navbar brand hover/focus color */
+}
+
+/* Custom navbar background color */
+.navbar-dark {
+    background-color: #343a40;
+    /* Dark gray: adjust as needed */
+}
+
+/* Optional: Background color for the whole body if needed */
+body {
+    background-color: #f8f9fa;
+    /* Light gray background */
+    color: #212529;
+    /* Primary text color */
+}

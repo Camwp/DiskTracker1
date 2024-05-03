@@ -16,7 +16,7 @@
             <h1>Disc Management</h1>
             <div class="mb-3">
                 <button class="btn btn-primary" id="addDiscBtn">Add Disc</button>
-                <button class="btn btn-secondary" id="bulkAddDiscBtn">Add Bulk Discs</button>
+                <button class="btn btn-secondary" id="bulkAddDiscBtn" style="display: none;">Add Bulk Discs</button>
             </div>
             <!-- Add a filter button in your HTML -->
             <div class="mb-3">
@@ -28,7 +28,7 @@
             <div id="discList">
                 <% if (discs && discs.length> 0) { %>
                     <% discs.forEach(disc=> { %>
-                        <div class="row mb-2" data-disc-id="<%= disc.id %>">
+                        <div class="row mb-2" style="cursor: pointer;" data-disc-id="<%= disc.id %>">
                             <div class="col-md-2">
                                 <img src="<%= disc.imageUrl || '/uploads/defaultDiscImage.png' %>" alt="Disc Image"
                                     class="img-thumbnail">
@@ -38,10 +38,44 @@
                                     <%= disc.name %>
                                 </p>
                                 <p><strong>Type:</strong>
+                                    <%= disc.disc_type %>
+                                </p>
+                                <p><strong>Plastic:</strong>
                                     <%= disc.plastic_type %>
                                 </p>
                                 <p><strong>Weight:</strong>
                                     <%= disc.weight %> grams
+                                </p>
+                                <p><strong>Color:</strong>
+                                    <span class="color-indicator" style="background-color:<%= disc.color %>"></span>
+
+                                </p>
+                                <style>
+                                    .color-indicator {
+                                        display: inline-block;
+                                        width: 15px;
+                                        /* Size of the circle */
+                                        height: 15px;
+                                        /* Size of the circle */
+                                        border-radius: 50%;
+                                        /* Make it round */
+                                        margin-right: 5px;
+                                        /* Space between the circle and the text */
+                                        vertical-align: middle;
+                                        /* Align with the text */
+                                        border: .5px solid black;
+                                    }
+                                </style>
+                                <p><strong>Stabilty:</strong>
+                                    <%= disc.stability %>
+                                        <strong>Speed:</strong>
+                                        <%= disc.speed %>
+                                            <strong>Glide:</strong>
+                                            <%= disc.glide %>
+                                                <strong>Turn:</strong>
+                                                <%= disc.turn %>
+                                                    <strong>Fade:</strong>
+                                                    <%= disc.fade %>
                                 </p>
                             </div>
                             <div class="col-md-2">

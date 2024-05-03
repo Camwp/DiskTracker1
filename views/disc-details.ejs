@@ -14,48 +14,93 @@
 
         <div class="container mt-3">
             <h1>Disc Details</h1>
-            <img src="<%= disc.imageUrl %>" alt="Disc Image" class="img-thumbnail" id="discImageDisplay">
+            <img src="<%= disc.imageUrl %>" style="cursor: pointer;" alt="Disc Image" class="img-thumbnail"
+                id="discImageDisplay">
             <input type="file" id="discImage" name="discImage" accept="image/*" style="display: none;">
             <button type="button" class="btn btn-primary" id="uploadImageButton" style="display: none;">Upload
                 Image</button>
 
-            <form action="/update-disc/<%= disc.id %>" method="post">
+            <form action="/update-disc/<%= disc.id %>" id="discDetailsForm" method="post">
+                <div class="mb-3">
+                    <label for="manufacturer" class="form-label">Manufacturer</label>
+                    <input type="text" class="form-control" id="manufacturer" value="<%= disc.manufacturer %>"
+                        name="manufacturer" required disabled>
+                </div>
                 <div class="mb-3">
                     <label for="name" class="form-label">Name</label>
-                    <input type="text" class="form-control" id="name" name="name" value="<%= disc.name %>" required>
+                    <input type="text" class="form-control" id="name" name="name" value="<%= disc.name %>" required
+                        disabled>
                 </div>
                 <div class="mb-3">
                     <label for="weight" class="form-label">Weight</label>
                     <input type="number" class="form-control" id="weight" name="weight" value="<%= disc.weight %>"
-                        required>
+                        required disabled>
                 </div>
                 <div class="mb-3">
                     <label for="plastic_type" class="form-label">Plastic Type</label>
                     <input type="text" class="form-control" id="plastic_type" name="plastic_type"
-                        value="<%= disc.plastic_type %>" required>
+                        value="<%= disc.plastic_type %>" required disabled>
                 </div>
                 <div class="mb-3">
-                    <label for="speed" class="form-label">Speed</label>
-                    <input type="number" class="form-control" id="speed" name="speed" value="<%= disc.speed %>"
-                        required>
+                    <label for="range_type" class="form-label">Range Type</label>
+                    <select class="form-control" id="range_type" name="range_type" required disabled>
+                        <option value="Approach" <%=disc.disc_type==='Approach' ? 'selected' : '' %>>Approach</option>
+                        <option value="Putter" <%=disc.disc_type==='Putter' ? 'selected' : '' %>>Putter</option>
+                        <option value="Mid-Range" <%=disc.disc_type==='Mid-Range' ? 'selected' : '' %>>Mid-Range
+                        </option>
+                        <option value="Distance Driver" <%=disc.disc_type==='Distance Driver' ? 'selected' : '' %>
+                            >Distance Driver
+                        </option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="stability">Stability</label>
+                    <select class="form-control" id="stability" name="stability" required disabled>
+                        <option value="Under-Stable" <%=disc.stability==='Under-Stable' ? 'selected' : '' %>
+                            >Under-Stable</option>
+                        <option value="Stable" <%=disc.stability==='Stable' ? 'selected' : '' %>>Stable</option>
+                        <option value="Over-Stable" <%=disc.stability==='Over-Stable' ? 'selected' : '' %>>Over-Stable
+                        </option>
+                    </select>
                 </div>
                 <div class="mb-3">
-                    <label for="glide" class="form-label">Glide</label>
-                    <input type="number" class="form-control" id="glide" name="glide" value="<%= disc.glide %>"
-                        required>
+                    <label for="speed" class="form-label">Speed (<span id="speedValue">
+                            <%= disc.speed %>
+                        </span>)</label>
+                    <input type="range" class="form-range" id="speed" name="speed" min="1" max="14"
+                        value="<%= disc.speed %>" oninput="updateSliderValue(this.id, this.value)" required disabled>
                 </div>
                 <div class="mb-3">
-                    <label for="turn" class="form-label">Turn</label>
-                    <input type="number" class="form-control" id="turn" name="turn" value="<%= disc.turn %>" required>
+                    <label for="glide" class="form-label">Glide(<span id="glideValue">
+                            <%= disc.glide %>
+                        </span>)</label>
+
+                    <input type="range" class="form-range" id="glide" name="glide" min="1" max="7"
+                        value="<%= disc.glide %>" oninput="updateSliderValue(this.id, this.value)" required disabled>
                 </div>
                 <div class="mb-3">
-                    <label for="fade" class="form-label">Fade</label>
-                    <input type="number" class="form-control" id="fade" name="fade" value="<%= disc.fade %>" required>
+                    <label for="turn" class="form-label">Turn (<span id="turnValue">
+                            <%= disc.turn %>
+                        </span>)</label>
+
+                    <input type="range" class="form-range" id="turn" name="turn" min="-5" max="2"
+                        value="<%= disc.turn %>" oninput="updateSliderValue(this.id, this.value)" required disabled>
                 </div>
+
+                <div class="mb-3">
+                    <label for="fade" class="form-label">Fade (<span id="fadeValue">
+                            <%= disc.fade %>
+                        </span>)</label>
+
+                    <input type="range" class="form-range" id="fade" name="fade" min="0" max="5"
+                        value="<%= disc.fade %>" oninput="updateSliderValue(this.id, this.value)" required disabled>
+                </div>
+
                 <div class="mb-3">
                     <label for="color" class="form-label">Color</label>
                     <input type="color" class="form-control form-control-color" id="color" name="color"
-                        value="<%= disc.color %>" required>
+                        value="<%= disc.color %>" required disabled>
                 </div>
                 <button type="button" class="btn btn-primary" id="editButton">Edit</button>
                 <button type="submit" class="btn btn-success" id="saveButton" style="display: none;">Save
@@ -65,39 +110,43 @@
         </div>
 
         <%- include('partials/footer') %>
-            <script>
-                function updateValue(id, value) {
-                    document.getElementById(id).textContent = value;
-                }
 
+            <script>
+                editable = false;
+                function updateSliderValue(id, value) {
+                    document.getElementById(id + 'Value').innerText = value;
+                }
                 document.getElementById('editButton').addEventListener('click', function () {
+                    editable = true;
                     const formElements = document.querySelectorAll('#discDetailsForm input, #discDetailsForm select');
                     formElements.forEach(element => element.disabled = false);
                     document.getElementById('saveButton').style.display = 'block';
                     this.style.display = 'none';
                 });
 
-                document.getElementById('discDetailsForm').addEventListener('submit', function (event) {
+                /*document.getElementById('discDetailsForm').addEventListener('submit', function (event) {
                     event.preventDefault();
                     const formData = new FormData(this);
                     fetch(`/update-disc/<%= disc.id %>`, {
                         method: 'POST',
                         body: formData
                     }).then(response => {
-                        if (!response.ok) throw new Error('Failed to update disc');
+                        if (!response.ok) throw new Error('Network response was not ok');
                         return response.json();
                     }).then(data => {
                         alert('Disc updated successfully!');
-                        window.location.reload();
+                        //window.location.reload();
                     }).catch(error => {
                         console.error('Error updating disc:', error);
-                        alert('Error updating disc.');
+                        alert('Error updating disc: ' + error.message);
                     });
-                });
-            </script>
-            <script>
+                });*/
+
                 document.getElementById('discImageDisplay').addEventListener('click', function () {
-                    document.getElementById('discImage').click();
+                    if (editable) {
+                        document.getElementById('discImage').click();
+                    }
+
                 });
 
                 document.getElementById('discImage').addEventListener('change', function () {

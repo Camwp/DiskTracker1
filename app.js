@@ -75,6 +75,7 @@ const initDb = () => {
         db.run(`CREATE TABLE IF NOT EXISTS discs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
+            manufacturer TEXT,
             name TEXT,
             weight INTEGER,
             plastic_type TEXT,
@@ -87,7 +88,8 @@ const initDb = () => {
             glide INTEGER DEFAULT 0,
             turn INTEGER DEFAULT 0,
             fade INTEGER DEFAULT 0,
-            stability INTEGER DEFAULT 0,
+            stability TEXT,
+            times_checked_out INTEGER DEFAULT 0,
             FOREIGN KEY (user_id) REFERENCES users (id)
             
         )`, (err) => {
@@ -199,10 +201,6 @@ app.post('/update-profile', (req, res) => {
     });
 });
 
-
-
-
-
 app.post('/register', (req, res) => {
     const { username, email, password } = req.body;
     const hashedPassword = bcrypt.hashSync(password, 10);  // Ensure bcrypt is correctly required at the top
@@ -219,7 +217,6 @@ app.post('/register', (req, res) => {
     });
 });
 
-
 app.get('/logout', (req, res) => {
     req.session.destroy(err => {
         if (err) {
@@ -228,7 +225,6 @@ app.get('/logout', (req, res) => {
         res.redirect('/');
     });
 });
-
 
 // Route for adding a single disc (GET request expected)
 app.get('/add-disc', (req, res) => {
@@ -257,11 +253,11 @@ app.get('/disc-details/:discId', checkAuthentication, (req, res) => {
 });
 
 app.post('/update-disc/:discId', (req, res) => {
-    const { name, weight, plastic_type, stats, color, speed, glide, turn, fade } = req.body;
+    const { name, weight, plastic_type, stats, color, speed, glide, turn, fade, stability, range_type } = req.body;
     const discId = req.params.discId;
 
-    const sql = `UPDATE discs SET name = ?, weight = ?, plastic_type = ?, stats = ?, color = ?, speed = ?, glide = ?, turn = ?, fade = ? WHERE id = ? AND user_id = ?`;
-    db.run(sql, [name, weight, plastic_type, stats, color, speed, glide, turn, fade, discId, req.session.user.id], function (err) {
+    const sql = `UPDATE discs SET name = ?, weight = ?, plastic_type = ?, stats = ?, color = ?, speed = ?, glide = ?, turn = ?, fade = ?, stability = ?, disc_type = ? WHERE id = ? AND user_id = ?`;
+    db.run(sql, [name, weight, plastic_type, stats, color, speed, glide, turn, fade, stability, range_type, discId, req.session.user.id], function (err) {
         if (err) {
             console.error("Error updating disc details:", err.message);
             res.status(500).send("Failed to update disc details due to database error.");
@@ -270,8 +266,6 @@ app.post('/update-disc/:discId', (req, res) => {
         res.redirect(`/disc-details/${discId}`);
     });
 });
-
-
 
 app.post('/update-disc-image/:discId', upload.single('discImage'), (req, res) => {
     if (!req.file) {
@@ -314,17 +308,14 @@ app.post('/update-disc-image/:discId', upload.single('discImage'), (req, res) =>
     });
 });
 
-
-
-
 app.post('/add-disc', upload.single('discImage'), (req, res) => {
-    const { name, weight, plastic_type, color, speed, glide, turn, fade, stability, range_type } = req.body;
+    const { manufacturer, name, weight, plastic_type, color, speed, glide, turn, fade, stability, range_type } = req.body;
     const imageUrl = req.file ? `/uploads/${req.file.filename}` : '/uploads/defaultDiscImage.png'; // Path where the image is saved
 
-    const sql = `INSERT INTO discs (user_id, name, weight, plastic_type, color, speed, glide, turn, fade, imageUrl, stability, disc_type) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO discs (user_id, manufacturer, name, weight, plastic_type, color, speed, glide, turn, fade, imageUrl, stability, disc_type) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     db.run(sql, [
-        req.session.user.id, name, weight, plastic_type, color, speed, glide, turn, fade, imageUrl, stability, range_type
+        req.session.user.id, manufacturer, name, weight, plastic_type, color, speed, glide, turn, fade, imageUrl, stability, range_type
     ], function (err) {
         if (err) {
             console.error("Database error:", err.message);
@@ -339,20 +330,35 @@ app.post('/add-disc', upload.single('discImage'), (req, res) => {
 
 app.post('/toggle-checkout/:id', (req, res) => {
     const discId = req.params.id;
-    const sql = `UPDATE discs SET checked_out = NOT checked_out WHERE id = ?`;
-    db.run(sql, [discId], function (err) {
+    // First, retrieve the current checked_out status
+    const getDisc = `SELECT checked_out FROM discs WHERE id = ?`;
+    db.get(getDisc, [discId], (err, disc) => {
         if (err) {
-            console.error("Database error when toggling checkout status:", err);
-            res.status(500).json({ error: "Database error" });
-            return;
+            console.error("Database error when fetching disc:", err);
+            return res.status(500).json({ error: "Database error" });
         }
-        if (this.changes === 0) {
-            res.status(404).json({ error: "Disc not found" });
-            return;
+        if (!disc) {
+            return res.status(404).json({ error: "Disc not found" });
         }
-        res.json({ success: true });
+
+        // Determine new checked out status and increment if needed
+        const newCheckedOut = !disc.checked_out;
+        const increment = disc.checked_out ? ', times_checked_out = times_checked_out + 1' : '';
+        const sql = `UPDATE discs SET checked_out = ?${increment} WHERE id = ?`;
+
+        db.run(sql, [newCheckedOut, discId], function (err) {
+            if (err) {
+                console.error("Database error when toggling checkout status:", err);
+                return res.status(500).json({ error: "Database error" });
+            }
+            if (this.changes === 0) {
+                return res.status(404).json({ error: "No disc updated" });
+            }
+            res.json({ success: true });
+        });
     });
 });
+
 
 
 

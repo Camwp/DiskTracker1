@@ -17,6 +17,10 @@
             <h1>Add New Disc</h1>
             <form action="/add-disc" method="POST" enctype="multipart/form-data">
                 <div class="mb-3">
+                    <label for="manufacturer" class="form-label">Manufacturer</label>
+                    <input type="text" class="form-control" id="manufacturer" name="manufacturer" required>
+                </div>
+                <div class="mb-3">
                     <label for="name" class="form-label">Disc Name</label>
                     <input type="text" class="form-control" id="name" name="name" required>
                 </div>
