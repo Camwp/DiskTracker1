@@ -23,67 +23,158 @@
                 <button class="btn btn-primary" onclick="window.location.href = '/disc-management'">All Discs</button>
                 <button class="btn btn-success" onclick="window.location.href = '/disc-management?checkedOut=true'">View
                     Checked Out Discs</button>
+                <button id="toggleFilters" class="btn btn-info">Show Filters</button>
+
+            </div>
+            <div class="mb-3" id="filterSection" style="display: none;">
+                <div class="filter-row">
+                    <input type="text" id="filterName" placeholder="Search by name" class="form-control">
+                    <input type="text" id="filterPlastic" placeholder="Search by plastic type" class="form-control">
+                    <select id="filterType" class="form-control">
+                        <option value="">All Types</option>
+                        <option value="Putter">Putter</option>
+                        <option value="Mid-Range">Mid-Range</option>
+                        <option value="Fairway Driver">Fairway Driver</option>
+                        <option value="Distance Driver">Distance Driver</option>
+                    </select>
+                    <select id="filterColor" class="form-control">
+                        <option value="">All Colors</option>
+                        <option value="#ff0000" style="background-color: #ff0000;">&nbsp;</option>
+                        <option value="#ffa500" style="background-color: #ffa500;">&nbsp;</option>
+                        <option value="#ffff00" style="background-color: #ffff00;">&nbsp;</option>
+                        <option value="#008000" style="background-color: #008000;">&nbsp;</option>
+                        <option value="#0000ff" style="background-color: #0000ff;">&nbsp;</option>
+                        <option value="#4b0082" style="background-color: #4b0082;">&nbsp;</option>
+                        <option value="#ee82ee" style="background-color: #ee82ee;">&nbsp;</option>
+                        <option value="#000000" style="background-color: #000000;">&nbsp;</option>
+                        <option value="#ffffff" style="background-color: #ffffff;">&nbsp;</option>
+                    </select>
+
+                </div>
+                <div class="button-row mt-2">
+                    <button id="applyFilters" class="btn btn-primary">Apply Filters</button>
+                    <button id="removeFilters" class="btn btn-secondary">Remove Filters</button>
+                </div>
             </div>
 
+            <style>
+                .filter-row {
+                    display: flex;
+                    justify-content: space-between;
+                    flex-wrap: wrap;
+                    /* Allows wrapping when screen is small */
+                }
+
+                .filter-row .form-control {
+                    flex-grow: 1;
+                    margin-right: 8px;
+                }
+
+                .button-row {
+                    display: flex;
+                    justify-content: center;
+                    /* Centers buttons in the row */
+                }
+
+                #filterColor option {
+                    height: 20px;
+                    width: 20px;
+                    padding: 0px;
+                    margin: 2px;
+                    vertical-align: middle;
+                    color: transparent;
+                    /* Hide text */
+                    border: 1px solid #ddd;
+                    /* Optional: adds a border around the color squares */
+                }
+
+                #filterColor {
+                    -webkit-appearance: none;
+                    /* Remove default style in WebKit browsers */
+                    -moz-appearance: none;
+                    /* Remove default style in Firefox */
+                    appearance: none;
+                    padding: 5px;
+                    /* Add some padding inside the select box */
+                    background: url("path_to_custom_dropdown_arrow_image") no-repeat right;
+                    /* Custom arrow */
+                }
+            </style>
             <div id="discList">
                 <% if (discs && discs.length> 0) { %>
                     <% discs.forEach(disc=> { %>
-                        <div class="row mb-2" style="cursor: pointer;" data-disc-id="<%= disc.id %>">
-                            <div class="col-md-2">
+                        <div class="row mb-2 border rounded p-2" style="cursor: pointer;" data-disc-id="<%= disc.id %>">
+                            <div class="col-md-3">
                                 <img src="<%= disc.imageUrl || '/uploads/defaultDiscImage.png' %>" alt="Disc Image"
                                     class="img-thumbnail">
                             </div>
-                            <div class="col-md-8">
-                                <p><strong>Name:</strong>
-                                    <%= disc.name %>
-                                </p>
-                                <p><strong>Type:</strong>
-                                    <%= disc.disc_type %>
-                                </p>
-                                <p><strong>Plastic:</strong>
-                                    <%= disc.plastic_type %>
-                                </p>
-                                <p><strong>Weight:</strong>
-                                    <%= disc.weight %> grams
-                                </p>
-                                <p><strong>Color:</strong>
-                                    <span class="color-indicator" style="background-color:<%= disc.color %>"></span>
+                            <div class="col-md-9">
+                                <div class="row">
+                                    <div class="col-md-4" id="textDetailsRow">
+                                        <p class="textDetails"><strong>Name:</strong>
+                                            <%= disc.name %>
+                                        </p>
 
-                                </p>
-                                <style>
-                                    .color-indicator {
-                                        display: inline-block;
-                                        width: 15px;
-                                        /* Size of the circle */
-                                        height: 15px;
-                                        /* Size of the circle */
-                                        border-radius: 50%;
-                                        /* Make it round */
-                                        margin-right: 5px;
-                                        /* Space between the circle and the text */
-                                        vertical-align: middle;
-                                        /* Align with the text */
-                                        border: .5px solid black;
-                                    }
-                                </style>
-                                <p><strong>Stabilty:</strong>
-                                    <%= disc.stability %>
-                                        <strong>Speed:</strong>
-                                        <%= disc.speed %>
-                                            <strong>Glide:</strong>
-                                            <%= disc.glide %>
+                                        <p class="textDetails"><strong>Type:</strong>
+                                            <%= disc.disc_type %>
+                                        </p>
+                                        <p class="textDetails"><strong>Plastic:</strong>
+                                            <%= disc.plastic_type %>
+                                        </p>
+                                        <p class="textDetails"><strong>Weight:</strong>
+                                            <%= disc.weight %> grams
+                                        </p>
+                                        <p><strong>Color:</strong> <span class="color-indicator"
+                                                style="display: inline-block; width: 20px; height: 20px; background-color: <%= disc.color %>;"></span>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p><strong>Stabilty:</strong>
+                                            <%= disc.stability %>
+                                        </p>
+                                        <div class="flightNums" style="display: flex; justify-content: space-between;">
+                                            <p class="flightNumsItem1"
+                                                style="display: grid; text-align: center; border: 1px solid black; width: 25%;">
+                                                <strong>Speed:</strong>
+                                                <%= disc.speed %>
+                                            </p>
+                                            <p class="flightNumsItem"
+                                                style="display: grid; text-align: center; border: 1px solid black; width: 25%;">
+                                                <strong>Glide:</strong>
+                                                <%= disc.glide %>
+                                            </p>
+                                            <p class="flightNumsItem"
+                                                style="display: grid; text-align: center; border: 1px solid black; width: 25%;">
                                                 <strong>Turn:</strong>
                                                 <%= disc.turn %>
-                                                    <strong>Fade:</strong>
-                                                    <%= disc.fade %>
-                                </p>
+                                            </p>
+                                            <p class="flightNumsItem4"
+                                                style="display: grid; text-align: center; border: 1px solid black; width: 25%;">
+                                                <strong>Fade:</strong>
+                                                <%= disc.fade %>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button class="btn btn-info checkout-btn" data-disc-id="<%= disc.id %>">
+                                            <%= disc.checked_out ? 'Check In' : 'Check Out' %>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-2">
-                                <button class="btn btn-info checkout-btn" data-disc-id="<%= disc.id %>">
-                                    <%= disc.checked_out ? 'Check In' : 'Check Out' %>
-                                </button>
+                            <div class="col-md-4">
+                                <select class="bag-option">
+                                    <% bags.forEach(bag=> { %>
+                                        <option value="<%= bag.id %>">
+                                            <%= bag.name %>
+                                        </option>
+                                        <% }); %>
+                                </select>
+                                <button type="button" class="addToBagBtn">Add to Bag</button>
+                                <button style="display: none;" type="button" class="removeFromBagBtn" return
+                                    false;>Remove from Bag</button>
+                            </div>
 
-                            </div>
                         </div>
                         <% }); %>
                             <% } else { %>
@@ -91,9 +182,10 @@
                                 <% } %>
             </div>
 
+        </div>
 
 
-            <%- include('partials/footer') %>
+        <%- include('partials/footer') %>
 
 </body>
 <script src="/js/discManagement.js"></script>

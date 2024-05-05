@@ -14,11 +14,71 @@
 
         <div class="container mt-3">
             <h1>Disc Details</h1>
+
+
+
+            <style>
+                #cameraContainer {
+                    position: relative;
+                    width: 300px;
+                    /* Square dimensions */
+                    height: 300px;
+                    /* Square dimensions */
+                    margin: auto;
+                    overflow: hidden;
+
+                }
+
+                #cameraFeed {
+                    width: 100%;
+                    height: 100%;
+                    display: block;
+                    object-fit: cover;
+                }
+
+                #overlay {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    /* Full width of the container */
+                    height: 100%;
+                    /* Full height of the container */
+                    border-radius: 50%;
+                    border: 2px solid red;
+                    box-sizing: border-box;
+                    pointer-events: none;
+                }
+
+                #toggleCamera {
+                    display: flex;
+                    margin: auto;
+                }
+
+                #capturePhoto {
+                    display: flex;
+                    margin: auto;
+                }
+            </style>
             <img src="<%= disc.imageUrl %>" style="cursor: pointer;" alt="Disc Image" class="img-thumbnail"
                 id="discImageDisplay">
             <input type="file" id="discImage" name="discImage" accept="image/*" style="display: none;">
             <button type="button" class="btn btn-primary" id="uploadImageButton" style="display: none;">Upload
                 Image</button>
+
+
+            <button id="toggleCamera" type="button" class="btn btn-primary" style="display: none;" return false;>Toggle
+                Camera</button>
+            <div id="cameraContainer" style="display: none;">
+                <video id="cameraFeed" playsinline></video>
+                <div id="overlay"></div>
+            </div>
+            <button id="capturePhoto" type="button" class="btn btn-success" style="display: none;" return false;>Capture
+                Photo</button>
+            <canvas id="canvas" style="display: none;"></canvas>
+
+
+
 
             <form action="/update-disc/<%= disc.id %>" id="discDetailsForm" method="post">
                 <div class="mb-3">
@@ -26,17 +86,53 @@
                     <input type="text" class="form-control" id="manufacturer" value="<%= disc.manufacturer %>"
                         name="manufacturer" required disabled>
                 </div>
+                <div id="manufacturerList"></div>
+                <style>
+                    .suggestion {
+                        padding: 5px;
+                        cursor: pointer;
+                    }
+
+                    .suggestion:hover {
+                        background-color: #f0f0f0;
+                    }
+                </style>
+                <script>
+                    document.getElementById('manufacturer').addEventListener('input', function () {
+                        const input = this.value;
+                        if (input.length > 1) {  // Start searching after one character
+                            fetch(`/api/manufacturers?search=${input}`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    const list = document.getElementById('manufacturerList');
+                                    list.innerHTML = '';  // Clear previous suggestions
+                                    data.forEach(item => {
+                                        const div = document.createElement('div');
+                                        div.textContent = item;
+                                        div.className = 'suggestion';
+                                        div.addEventListener('click', function () {
+                                            document.getElementById('manufacturer').value = this.textContent;
+                                            list.innerHTML = '';  // Clear suggestions after selection
+                                        });
+                                        list.appendChild(div);
+                                    });
+                                });
+                        }
+                    });
+                </script>
                 <div class="mb-3">
                     <label for="name" class="form-label">Name</label>
                     <input type="text" class="form-control" id="name" name="name" value="<%= disc.name %>" required
                         disabled>
                 </div>
                 <div class="mb-3">
-                    <label for="weight" class="form-label">Weight</label>
-                    <input type="number" class="form-control" id="weight" name="weight" value="<%= disc.weight %>"
-                        required disabled>
+                    <label for="weight" class="form-label">Weight (<span id="weightValue">
+                            <%= disc.weight %>
+                        </span>)</label>
+                    <input type="range" class="form-range" id="weight" name="weight" value="<%= disc.weight %>"
+                        min="100" max="200" value="101" oninput="updateSliderValue(this.id, this.value)" disabled>
                 </div>
-                <div class="mb-3">
+                <div class=" mb-3">
                     <label for="plastic_type" class="form-label">Plastic Type</label>
                     <input type="text" class="form-control" id="plastic_type" name="plastic_type"
                         value="<%= disc.plastic_type %>" required disabled>
@@ -64,6 +160,34 @@
                         </option>
                     </select>
                 </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const turnInput = document.getElementById('turn');
+                        const fadeInput = document.getElementById('fade');
+                        const stabilitySelect = document.getElementById('stability');
+
+                        function updateStability() {
+                            const turn = parseInt(turnInput.value, 10);
+                            const fade = parseInt(fadeInput.value, 10);
+                            const stability = turn + fade;
+
+                            if (stability < 0) {
+                                stabilitySelect.value = 'Under-Stable';
+                            } else if (stability > 0) {
+                                stabilitySelect.value = 'Over-Stable';
+                            } else {
+                                stabilitySelect.value = 'Stable';
+                            }
+                        }
+
+                        // Call updateStability whenever the 'turn' or 'fade' value changes
+                        turnInput.addEventListener('input', updateStability);
+                        fadeInput.addEventListener('input', updateStability);
+
+                        // Initialize stability on page load
+                        updateStability();
+                    });
+                </script>
                 <div class="mb-3">
                     <label for="speed" class="form-label">Speed (<span id="speedValue">
                             <%= disc.speed %>
@@ -105,84 +229,260 @@
                 <button type="button" class="btn btn-primary" id="editButton">Edit</button>
                 <button type="submit" class="btn btn-success" id="saveButton" style="display: none;">Save
                     Changes</button>
+                <button type="button" class="btn btn-danger" onclick="removeDisc(<%= disc.id %>)"
+                    id="deleteButton">Delete</button>
 
             </form>
         </div>
-
-        <%- include('partials/footer') %>
-
-            <script>
-                editable = false;
-                function updateSliderValue(id, value) {
-                    document.getElementById(id + 'Value').innerText = value;
-                }
-                document.getElementById('editButton').addEventListener('click', function () {
-                    editable = true;
-                    const formElements = document.querySelectorAll('#discDetailsForm input, #discDetailsForm select');
-                    formElements.forEach(element => element.disabled = false);
-                    document.getElementById('saveButton').style.display = 'block';
-                    this.style.display = 'none';
-                });
-
-                /*document.getElementById('discDetailsForm').addEventListener('submit', function (event) {
-                    event.preventDefault();
-                    const formData = new FormData(this);
-                    fetch(`/update-disc/<%= disc.id %>`, {
-                        method: 'POST',
-                        body: formData
-                    }).then(response => {
-                        if (!response.ok) throw new Error('Network response was not ok');
-                        return response.json();
-                    }).then(data => {
-                        alert('Disc updated successfully!');
-                        //window.location.reload();
-                    }).catch(error => {
-                        console.error('Error updating disc:', error);
-                        alert('Error updating disc: ' + error.message);
-                    });
-                });*/
-
-                document.getElementById('discImageDisplay').addEventListener('click', function () {
-                    if (editable) {
-                        document.getElementById('discImage').click();
+        <script>
+            editable = false;
+            function updateSliderValue(id, value) {
+                document.getElementById(id + 'Value').innerText = value;
+            }
+            document.getElementById('editButton').addEventListener('click', function () {
+                editable = true;
+                const formElements = document.querySelectorAll('#discDetailsForm input, #discDetailsForm select');
+                formElements.forEach(element => {
+                    // Check if the element's name is not 'stability'
+                    if (element.name !== 'stability') {
+                        // Enable all elements except for 'stability'
                     }
-
+                    element.disabled = false;
                 });
+                document.getElementById('toggleCamera').style.display = 'block';
 
-                document.getElementById('discImage').addEventListener('change', function () {
-                    if (this.files && this.files[0]) {
-                        var reader = new FileReader();
-                        reader.onload = function (e) {
-                            document.getElementById('discImageDisplay').src = e.target.result;
+                document.getElementById('saveButton').style.display = 'block';
+                this.style.display = 'none';
+            });
+            const formElements = document.querySelectorAll('#discDetailsForm input, #discDetailsForm select');
+            formElements.forEach(element => element.disabled = true);
+
+            /*document.getElementById('discDetailsForm').addEventListener('submit', function (event) {
+                event.preventDefault();
+                const formData = new FormData(this);
+                fetch(`/update-disc/<%= disc.id %>`, {
+                    method: 'POST',
+                    body: formData
+                }).then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                }).then(data => {
+                    alert('Disc updated successfully!');
+                    //window.location.reload();
+                }).catch(error => {
+                    console.error('Error updating disc:', error);
+                    alert('Error updating disc: ' + error.message);
+                });
+            });*/
+
+            document.getElementById('discImageDisplay').addEventListener('click', function () {
+                if (editable) {
+                    document.getElementById('discImage').click();
+                }
+
+            });
+
+            document.getElementById('discImage').addEventListener('change', function () {
+                if (this.files && this.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        document.getElementById('discImageDisplay').src = e.target.result;
+                        document.getElementById('uploadImageButton').style.display = 'block';
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+
+            document.getElementById('uploadImageButton').addEventListener('click', function () {
+                const formData = new FormData();
+                const discId = '<%= disc.id %>';
+                formData.append('discImage', document.getElementById('discImage').files[0]);
+
+                fetch('/update-disc-image/' + discId, {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.getElementById('uploadImageButton').style.display = 'none';
+                        } else {
+                            alert('Failed to update image.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error updating disc image:', error);
+                        alert('Error updating disc image.');
+                    });
+            });
+
+            // JavaScript fetch function to remove a disc
+            function removeDisc(discId) {
+                fetch(`/remove-disc/${discId}`, {
+                    method: 'POST',
+                    credentials: 'same-origin', // Include cookies
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Handle success
+                        console.log(data);
+                        window.location.href = '/disc-management';
+                        // Optionally, update the UI to reflect the removal of the disc
+                    })
+                    .catch(error => {
+                        // Handle error
+                        console.error('Error:', error);
+                    });
+            }
+
+        </script>
+        <script>
+            function updateSliderValue(id, value) {
+                document.getElementById(id + 'Value').innerText = value;
+            }
+            function previewImage() {
+                const file = document.getElementById('discImage').files[0];
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const imgElement = document.createElement('img');
+                    imgElement.src = e.target.result;
+                    imgElement.onload = function () {
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.width = imgElement.width;
+                        canvas.height = imgElement.height;
+                        context.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
+                        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                        const color = colorAverage(imageData.data);
+                        document.getElementById('color').value = color;
+                        document.getElementById('imagePreviewSrc').src = e.target.result; // Update the image preview
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function colorAverage(data) {
+                let r = 0, g = 0, b = 0, count = 0;
+                for (let i = 0; i < data.length; i += 4) {
+                    r += data[i];
+                    g += data[i + 1];
+                    b += data[i + 2];
+                    count++;
+                }
+                r = Math.floor(r / count);
+                g = Math.floor(g / count);
+                b = Math.floor(b / count);
+
+                // Define predefined colors
+                const colors = [
+                    { name: 'Red', r: 255, g: 0, b: 0 },
+                    { name: 'Orange', r: 255, g: 165, b: 0 },
+                    { name: 'Yellow', r: 255, g: 255, b: 0 },
+                    { name: 'Green', r: 0, g: 128, b: 0 },
+                    { name: 'Blue', r: 0, g: 0, b: 255 },
+                    { name: 'Indigo', r: 75, g: 0, b: 130 },
+                    { name: 'Violet', r: 238, g: 130, b: 238 },
+                    { name: 'Black', r: 0, g: 0, b: 0 },
+                    { name: 'White', r: 255, g: 255, b: 255 }
+                    // Add more predefined colors and shades as needed
+                ];
+
+                // Find the nearest predefined color
+                let minDistance = Infinity;
+                let nearestColor = null;
+                for (const color of colors) {
+                    const distance = Math.sqrt(
+                        Math.pow(color.r - r, 2) +
+                        Math.pow(color.g - g, 2) +
+                        Math.pow(color.b - b, 2)
+                    );
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        nearestColor = color;
+                    }
+                }
+
+                // Return the hexadecimal representation of the nearest color
+                if (nearestColor) {
+                    return `#${nearestColor.r.toString(16).padStart(2, '0')}${nearestColor.g.toString(16).padStart(2, '0')}${nearestColor.b.toString(16).padStart(2, '0')}`;
+                } else {
+                    // Default color if no nearest color found
+                    return '#000000'; // Black
+                }
+            }
+
+        </script>
+        <script>
+            const cameraButton = document.getElementById('toggleCamera');
+            const captureButton = document.getElementById('capturePhoto');
+            const video = document.getElementById('cameraFeed');
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+            const photoPreview = document.getElementById('discImage');
+            let stream = null;
+
+            cameraButton.onclick = () => {
+                if (!stream) {
+                    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                        .then(function (mediaStream) {
+                            stream = mediaStream;
+                            video.srcObject = stream;
+                            video.play();
+                            document.getElementById('cameraContainer').style.display = 'block';
+                            document.getElementById('capturePhoto').style.display = 'block';
+                        }).catch(function (error) {
+                            console.error("Error accessing the camera: ", error);
+                            alert("Error accessing the camera: " + error.message);
+                        });
+                } else {
+                    video.pause();
+                    stream.getTracks().forEach(track => track.stop());
+                    stream = null;
+                    document.getElementById('cameraContainer').style.display = 'none';
+                    document.getElementById('capturePhoto').style.display = 'none';
+                }
+            };
+
+            captureButton.onclick = () => {
+                if (stream) {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    canvas.toBlob(blob => {
+                        const file = new File([blob], 'captured-image.png', { type: 'image/png' });
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        document.getElementById('discImage').files = dataTransfer.files;
+                        photoPreview.src = URL.createObjectURL(blob);
+                        const img = new Image();
+                        img.onload = function (e) {
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            ctx.drawImage(img, 0, 0);
+                            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                            const color = colorAverage(imageData.data);
+                            document.getElementById('color').value = color;
+                            document.getElementById('discImage').files = dataTransfer.files; // Set the file to input
+                            document.getElementById('discImageDisplay').src = URL.createObjectURL(blob); // Update display image
                             document.getElementById('uploadImageButton').style.display = 'block';
                         };
-                        reader.readAsDataURL(this.files[0]);
-                    }
-                });
+                        img.src = URL.createObjectURL(blob);
+                    }, 'image/png');
 
-                document.getElementById('uploadImageButton').addEventListener('click', function () {
-                    const formData = new FormData();
-                    const discId = '<%= disc.id %>';
-                    formData.append('discImage', document.getElementById('discImage').files[0]);
+                    cameraButton.click(); // Close the camera after capturing the photo
+                }
+            };
 
-                    fetch('/update-disc-image/' + discId, {
-                        method: 'POST',
-                        body: formData
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                document.getElementById('uploadImageButton').style.display = 'none';
-                            } else {
-                                alert('Failed to update image.');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error updating disc image:', error);
-                            alert('Error updating disc image.');
-                        });
-                });
-            </script>
+
+        </script>
 </body>
+<%- include('partials/footer') %>
 
 </html>

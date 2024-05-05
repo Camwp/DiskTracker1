@@ -164,3 +164,59 @@ body {
     color: #212529;
     /* Primary text color */
 }
+
+#discImageDisplay,
+.img-thumbnail {
+    border-radius: 50%;
+    /* Makes the image circular */
+    width: 250px;
+    /* Set a specific width or use percentage */
+    height: 250px;
+    /* Height must be the same as the width for a perfect circle */
+    object-fit: cover;
+    /* Ensures the image covers the area without distorting aspect ratio */
+    max-width: 100%;
+}
+
+.card-img {
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.flightNumsItem1 {
+    border-radius: 10px 0px 0px 10px;
+}
+
+.flightNumsItem {
+    border-radius: 0px 0px 0px 0px;
+}
+
+.flightNumsItem4 {
+    border-radius: 0px 10px 10px 0px;
+}
+
+
+
+@media (max-width: 768px) {
+    .card-img {
+        width: 100px;
+        /* full width on small screens */
+        height: 100px;
+    }
+
+    .img-thumbnail {
+        width: 100px;
+        height: 100px;
+    }
+
+    #textDetailsRow {
+        display: grid;
+        grid-template-columns: repeat(3, auto);
+    }
+
+    .textDetails {
+        display: grid;
+        text-align: center;
+    }
+}

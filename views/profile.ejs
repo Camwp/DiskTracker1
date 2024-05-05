@@ -15,25 +15,39 @@
             <h1>User Profile</h1>
             <p>Welcome, <%= user.username %>
             </p>
-        </div>
-        <div class="container mt-5">
-            <h2>Edit Profile</h2>
-            <form action="/update-profile" method="POST">
-                <div class="form-group">
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username" value="<%= user.username %>" required>
+
+            <% if (favoriteDisc) { %>
+                <h2>Your Favorite Disc</h2>
+                <div class="favorite-disc">
+                    <p>Disc Name: <%= favoriteDisc.name %>
+                    </p>
+                    <p>Checked Out: <%= favoriteDisc.times_checked_out %> times</p>
                 </div>
-                <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" value="<%= user.email %>" required>
-                </div>
-                <button type="submit" class="btn">Update Profile</button>
-            </form>
+                <% } else { %>
+                    <p>You do not have a favorite disc recorded.</p>
+                    <% } %>
+
+                        <h3>Stats</h3>
+                        <p>Total Discs: <%= discCount %>
+                        </p>
+                        <p>Total Bags: <%= bagCount %>
+                        </p>
+
+                        <h2>Edit Profile</h2>
+                        <form action="/update-profile" method="POST">
+                            <div class="form-group">
+                                <label for="username">Username:</label>
+                                <input type="text" id="username" name="username" value="<%= user.username %>" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email:</label>
+                                <input type="email" id="email" name="email" value="<%= user.email %>" required>
+                            </div>
+                            <button type="submit" class="btn">Update Profile</button>
+                        </form>
         </div>
 
         <%- include('partials/footer') %>
-
-
 </body>
 
 </html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bag Details</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <%- include('partials/header', { title: 'Bag Details' , user: user }) %>
+        <div class="container">
+            <h1>Bag Details: <%= bag.name %>
+            </h1>
+
+            <div>
+                <h2>Contents:</h2>
+                <ul>
+                    <% discs.forEach(disc=> { %>
+                        <li>
+                            <%= disc.name %> - <%= disc.disc_type %>
+                                    <form action="/remove-disc-from-bag/<%= bag.id %>/<%= disc.id %>" method="post"
+                                        style="display: inline;">
+                                        <button type="submit">x</button>
+                                    </form>
+                        </li>
+                        <% }); %>
+                </ul>
+                <h3>Add Disc to Bag</h3>
+                <input type="text" id="discSearch" placeholder="Type to search...">
+                <ul id="discList"></ul>
+            </div>
+        </div>
+        <%- include('partials/footer') %>
+            <script src="/js/bootstrap.bundle.min.js"></script>
+            <script>
+                document.getElementById('discSearch').addEventListener('input', function (e) {
+                    const searchValue = e.target.value;
+                    if (searchValue.length > 2) { // Start searching after 2 characters
+                        fetch(`/api/discs?search=${searchValue}`)
+                            .then(response => response.json())
+                            .then(discs => {
+                                const list = document.getElementById('discList');
+                                list.innerHTML = '';
+                                discs.forEach(disc => {
+                                    const item = document.createElement('li');
+                                    item.textContent = disc.name;
+                                    item.onclick = () => {
+                                        fetch(`/add-disc-to-bag`, {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ bagId: <%= bag.id %>, discId: disc.id })
+                                        }).then(() => {
+                                            window.location.reload(); // Reload to show new disc in bag
+                                        });
+                                    };
+                                    list.appendChild(item);
+                                });
+                            });
+                    }
+                });
+            </script>
+</body>
+
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bag Management</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+</head>
+
+<body>
+    <%- include('partials/header', { title: 'Bag Management' , user: user }) %>
+        <div class="container mt-3">
+            <h1>Bag Management</h1>
+            <div class="my-3">
+                <form action="/add-bag" method="post" class="form-inline">
+                    <input type="text" name="name" placeholder="Bag Name" required class="form-control mr-2">
+                    <button type="submit" class="btn btn-primary">Create Bag</button>
+                </form>
+            </div>
+            <div class="row">
+                <!--<h2>Your Checked-out Bags</h2>-->
+                <% bags.forEach(bag=> { %>
+                    <% if (bag.checked_out) { %>
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-danger"> <!-- Highlighted card -->
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <%= bag.name %>
+                                    </h5>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <a href="/bag-details/<%= bag.id %>" class="btn btn-secondary">View Details</a>
+                                        <form action="/toggle-bag-checkout/<%= bag.id %>" method="post"
+                                            class="d-inline">
+                                            <button type="button" class="btn btn-danger removeBag"
+                                                data-bag-id="<%= bag.id %>">Remove</button>
+                                            <button id="toggleCheck" type="button" class="btn btn-info toggleCheck"
+                                                data-bag-id="<%= bag.id%>">
+                                                <%= bag.checked_out ? 'Check In' : 'Check Out' %>
+                                            </button>
+                                        </form><!--
+                                        <% if (!bag.is_primary) { %>
+                                            <button type="button" class="btn btn-warning set-primary"
+                                                data-bag-id="<%= bag.id %>" data-is-primary="<%= bag.is_primary %>">
+                                                <%= bag.is_primary ? 'Primary' : 'Set as Primary' %>
+                                            </button>
+    
+                                            <% } %>-->
+                                    </div>
+                                    <!-- Button and form here for checking in -->
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+                            <% }); %>
+            </div>
+            <div class="row">
+                <h2>Your Bags</h2>
+                <% bags.forEach(bag=> { %>
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <%= bag.name %>
+                                </h5>
+                                <!--<p class="card-text">Primary: <%= bag.is_primary ? 'Yes' : 'No' %>
+                                </p>-->
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a href="/bag-details/<%= bag.id %>" class="btn btn-secondary">View Details</a>
+                                    <form action="/toggle-bag-checkout/<%= bag.id %>" method="post" class="d-inline">
+                                        <button type="button" class="btn btn-danger removeBag"
+                                            data-bag-id="<%= bag.id %>">Remove</button>
+                                        <button id="toggleCheck" type="button" class="btn btn-info toggleCheck"
+                                            data-bag-id="<%= bag.id%>">
+                                            <%= bag.checked_out ? 'Check In' : 'Check Out' %>
+                                        </button>
+                                    </form><!--
+                                    <% if (!bag.is_primary) { %>
+                                        <button type="button" class="btn btn-warning set-primary"
+                                            data-bag-id="<%= bag.id %>" data-is-primary="<%= bag.is_primary %>">
+                                            <%= bag.is_primary ? 'Primary' : 'Set as Primary' %>
+                                        </button>
+
+                                        <% } %>-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <% }); %>
+            </div>
+        </div>
+        <%- include('partials/footer') %>
+            <script src="/js/bootstrap.bundle.min.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const removeButtons = document.querySelectorAll('.removeBag');
+
+                    removeButtons.forEach(button => {
+                        button.addEventListener('click', function () {
+                            const bagId = this.getAttribute('data-bag-id');
+                            if (confirm("Are you sure you want to remove this bag?")) {
+                                fetch('/remove-bag/' + bagId, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    }
+                                })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            alert('Bag removed successfully!');
+                                            location.reload();  // Reload the page to update the list
+                                        } else {
+                                            alert('Failed to remove the bag: ' + data.message);
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error removing bag:', error);
+                                        alert('Error removing the bag.');
+                                    });
+                            }
+                        });
+                    });
+                });
+
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    var buttons = document.querySelectorAll('.toggleCheck');
+                    if (buttons.length === 0) {
+                        console.log('No buttons found');
+                    } else {
+                        console.log('Attaching listeners to ' + buttons.length + ' buttons');
+                    }
+
+                    buttons.forEach(button => {
+                        button.addEventListener('click', function (event) {
+                            event.preventDefault();
+                            var bagId = this.getAttribute('data-bag-id');
+
+                            console.log('Toggling bag with ID:', bagId);
+
+                            fetch('/toggle-bag-checkout/' + bagId, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        this.textContent = data.checked_out ? 'Check In' : 'Check Out';
+                                        console.log('Toggle successful:', data.checked_out);
+                                        location.reload();
+                                    } else {
+                                        console.error('Failed to toggle:', data.message);
+                                        alert(data.message || 'Failed to toggle the checkout status.');
+                                    }
+                                })
+                                .then(data => {
+                                    if (data.success) {
+                                        this.textContent = data.checked_out ? 'Check In' : 'Check Out';
+                                    } else {
+                                        alert(data.message || 'Failed to toggle the checkout status.');
+                                    }
+                                })
+
+                                .catch(error => {
+                                    console.error('Fetch error:', error);
+                                });
+                        });
+                    });
+
+                });
+
+
+
+
+            </script>
+</body>
+
+
+
+</html>

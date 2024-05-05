@@ -7,33 +7,44 @@
     <title>
         <%= title %>
     </title>
-    <script src="/js/bootstrap.bundle.min.js"></script>
+
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/style.css"> <!-- Your custom styles if any -->
+    <link
+        href="https://cdn.jsdelivr.net/gh/eliyantosarage/font-awesome-pro@main/fontawesome-pro-6.5.2-web/css/all.min.css"
+        rel="stylesheet">
 </head>
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/">Disc Golf Inventory</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <a class="navbar-brand" href="/">DGBM Pro</a>
+            <button class="navbar-toggler" type="button" aria-controls="navbarNav" aria-expanded="false"
+                aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a href="/" class="nav-link">Home</a>
+                        <a href="/" class="nav-link"><i class="fa-solid fa-house"></i> Home</a>
                     </li>
                     <% if (user) { %>
+
                         <li class="nav-item">
-                            <a href="/profile" class="nav-link">Profile</a>
+                            <a href="/disc-management" class="nav-link"><i class="fa-solid fa-flying-disc"></i>
+                                Discs</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="/bag-management" class="nav-link"><i class="fa-solid fa-backpack"></i> Bags</a>
                         </li>
                         <li class="nav-item">
-                            <a href="/disc-management" class="nav-link">Disc Management</a>
+                            <a href="/profile" class="nav-link"><i class="fa-solid fa-user"></i> Profile</a>
                         </li>
                         <li class="nav-item">
-                            <a href="/logout" class="nav-link">Logout</a>
+                            <a href="/logout" class="nav-link"><i class="fa-solid fa-right-from-bracket"></i>
+                                Logout</a>
                         </li>
                         <% } else { %>
                             <!-- Modal Trigger Button -->
@@ -102,6 +113,32 @@
                             <% } %>
                                 <script>
                                     document.addEventListener("DOMContentLoaded", function () {
+                                        const navbarToggler = document.querySelector('.navbar-toggler');
+                                        const navbarCollapse = document.getElementById('navbarNav');
+
+                                        navbarToggler.addEventListener('click', function () {
+                                            const isExpanded = navbarToggler.getAttribute('aria-expanded') === 'true';
+                                            navbarToggler.setAttribute('aria-expanded', !isExpanded);
+                                            $(navbarCollapse).collapse('toggle');
+                                        });
+
+                                        document.addEventListener('click', function (event) {
+                                            if (!navbarToggler.contains(event.target) && !navbarCollapse.contains(event.target) && $('#navbarNav').hasClass('show')) {
+                                                $(navbarCollapse).collapse('hide');
+                                                navbarToggler.setAttribute('aria-expanded', false);
+                                            }
+                                        });
+
+                                        navbarCollapse.addEventListener('click', function (event) {
+                                            event.stopPropagation();
+                                        });
+                                    });
+                                </script>
+
+
+
+                                <script>
+                                    document.addEventListener("DOMContentLoaded", function () {
                                         const toggleFormLink = document.getElementById('toggleForm');
                                         const loginForm = document.getElementById('loginForm');
                                         const registerForm = document.getElementById('registerForm');
@@ -154,3 +191,10 @@
             </div>
         </div>
     </nav>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

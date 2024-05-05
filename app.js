@@ -5,11 +5,26 @@ const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const path = require('path');
 const app = express();
-const PORT = process.env.PORT || 80;
+const PORT = process.env.PORT || 800;
 const SQLiteStore = require('connect-sqlite3')(session);
 const multer = require('multer');
 const fs = require('fs');
 const uploadPath = './public/uploads';
+const csv = require('csv-parse');
+const https = require('https');
+
+
+const httpsOptions = {
+    key: fs.readFileSync('./server.key', 'utf8'),
+    cert: fs.readFileSync('./server.cert', 'utf8')
+};
+
+const server = https.createServer(httpsOptions, app);
+
+
+
+
+let manufacturers = [];
 
 if (!fs.existsSync(uploadPath)) {
     fs.mkdirSync(uploadPath, { recursive: true });
@@ -52,6 +67,16 @@ app.use(session({
 }));
 
 
+fs.createReadStream('./db/discManufacturer.csv')
+    .pipe(csv.parse({ columns: true, delimiter: ',' }))
+    .on('data', (data) => {
+        manufacturers.push(data.Manufacturer); // Adjust 'Manufacturer' based on your CSV headers
+    })
+    .on('end', () => {
+        // Sort manufacturers alphabetically
+        manufacturers.sort();
+        //console.log('Manufacturers sorted alphabetically:', manufacturers);
+    });
 // Setting up EJS as the template engine
 app.set('view engine', 'ejs');
 
@@ -96,6 +121,27 @@ const initDb = () => {
             if (err) console.error(err.message);
             else console.log('Tables created or already exist.');
         });
+        db.run(`CREATE TABLE IF NOT EXISTS bags (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            name TEXT NOT NULL,
+            is_primary BOOLEAN DEFAULT false,
+            checked_out BOOLEAN DEFAULT false,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )`, (err) => {
+            if (err) console.error(err.message);
+            else console.log('Tables created or already exist.');
+        });
+        db.run(`CREATE TABLE IF NOT EXISTS discs_bags (
+            disc_id INTEGER,
+            bag_id INTEGER,
+            FOREIGN KEY (disc_id) REFERENCES discs(id),
+            FOREIGN KEY (bag_id) REFERENCES bags(id),
+            PRIMARY KEY (disc_id, bag_id)
+        )`, (err) => {
+            if (err) console.error(err.message);
+            else console.log('Tables created or already exist.');
+        });
     });
 };
 
@@ -126,30 +172,108 @@ app.get('/login', (req, res) => {
 });
 
 app.get('/profile', checkAuthentication, (req, res) => {
-    // Ensure 'user' is passed consistently
-    res.render('profile', { user: req.session.user });
-});
+    const userId = req.session.user.id;
+    let profileData = { user: req.session.user };
 
-app.get('/disc-management', checkAuthentication, (req, res) => {
-    const { checkedOut } = req.query; // Get query parameter
-    let sql = "SELECT * FROM discs WHERE user_id = ?";
-    let params = [req.session.user.id];
+    // Query to find the most checked-out disc
+    const favoriteDiscQuery = `
+        SELECT *, MAX(times_checked_out) AS most_checked_out
+        FROM discs
+        WHERE user_id = ?
+        GROUP BY id
+        ORDER BY most_checked_out DESC
+        LIMIT 1;
+    `;
 
-    // If filter is applied, modify the SQL query to get only checked out discs
-    if (checkedOut === 'true') {
-        sql += " AND checked_out = 1"; // Assuming 'is_checked_out' is a column indicating status
-    }
+    const countDiscsQuery = `SELECT COUNT(*) AS discCount FROM discs WHERE user_id = ?`;
+    const countBagsQuery = `SELECT COUNT(*) AS bagCount FROM bags WHERE user_id = ?`;
 
-    db.all(sql, params, (err, discs) => {
-        if (err) {
-            console.error("Database error when fetching discs:", err);
-            res.render('disc-management', { user: req.session.user, discs: [], error: "Failed to fetch discs due to database error." });
-        } else {
-            res.render('disc-management', { user: req.session.user, discs: discs });
-        }
+    // Using SQLite's sequential execution to handle multiple queries
+    db.serialize(() => {
+        db.get(favoriteDiscQuery, [userId], (err, favoriteDisc) => {
+            if (err) {
+                console.error("Database error when fetching favorite disc:", err);
+            } else {
+                profileData.favoriteDisc = favoriteDisc;
+            }
+
+            db.get(countDiscsQuery, [userId], (err, discs) => {
+                if (err) {
+                    console.error("Database error when counting discs:", err);
+                } else {
+                    profileData.discCount = discs.discCount;
+                }
+
+                db.get(countBagsQuery, [userId], (err, bags) => {
+                    if (err) {
+                        console.error("Database error when counting bags:", err);
+                    } else {
+                        profileData.bagCount = bags.bagCount;
+                    }
+
+                    // Render the profile page with all gathered data
+                    res.render('profile', profileData);
+                });
+            });
+        });
     });
 });
 
+
+
+app.get('/disc-management', checkAuthentication, (req, res) => {
+    let { name, plastic, type, color, checkedOut } = req.query;
+    let sql = "SELECT * FROM discs WHERE user_id = ?";
+    let params = [req.session.user.id];
+
+    // Fetch bags data
+    let bagsSql = "SELECT * FROM bags WHERE user_id = ?";
+    let bagsParams = [req.session.user.id];
+
+    db.all(bagsSql, bagsParams, (err, bags) => {
+        if (err) {
+            console.error("Database error when fetching bags:", err.message);
+            return res.render('disc-management', { user: req.session.user, discs: [], bags: [], error: "Failed to fetch bags due to database error." });
+        }
+
+        if (checkedOut === 'true') {
+            sql += " AND checked_out = 1";
+        }
+        if (name && name.trim()) {
+            sql += " AND name LIKE ?";
+            params.push('%' + name.trim() + '%');
+        }
+        if (plastic && plastic.trim()) {
+            sql += " AND plastic_type LIKE ?";
+            params.push('%' + plastic.trim() + '%');
+        }
+        if (type && type !== "") {
+            sql += " AND disc_type = ?";
+            params.push(type);
+        }
+
+        if (color && color !== "" && color !== "#ffffff") { // Assuming "#ffffff" is the default for "All Colors"
+            sql += " AND color = ?";
+            params.push(color);
+        }
+
+        db.all(sql, params, (err, discs) => {
+            if (err) {
+                console.error("Database error when fetching discs:", err.message);
+                return res.render('disc-management', { user: req.session.user, discs: [], bags: bags, error: "Failed to fetch discs due to database error." });
+            }
+            res.render('disc-management', { user: req.session.user, discs: discs, bags: bags });
+        });
+    });
+});
+
+
+
+app.get('/api/manufacturers', (req, res) => {
+    const search = req.query.search;
+    const results = manufacturers.filter(m => m.toLowerCase().includes(search.toLowerCase()));
+    res.json(results);
+});
 
 app.post('/login', (req, res) => {
     const { email, password, remember } = req.body; // Make sure the 'remember' checkbox sends this data
@@ -180,8 +304,6 @@ app.post('/login', (req, res) => {
         });
     });
 });
-
-
 
 app.post('/update-profile', (req, res) => {
     const { username, email } = req.body;
@@ -326,6 +448,24 @@ app.post('/add-disc', upload.single('discImage'), (req, res) => {
     });
 });
 
+// Route to remove a disc
+app.post('/remove-disc/:discId', (req, res) => {
+    const discId = req.params.discId;
+
+    const sql = `DELETE FROM discs WHERE id = ? AND user_id = ?`;
+    db.run(sql, [discId, req.session.user.id], function (err) {
+        if (err) {
+            console.error("Database error:", err.message);
+            res.status(500).send("Failed to remove disc due to database error.");
+            return;
+        }
+        if (this.changes === 0) {
+            res.status(404).send("Disc not found or not available for your account.");
+            return;
+        }
+        res.json({ success: true });
+    });
+});
 
 
 app.post('/toggle-checkout/:id', (req, res) => {
@@ -360,8 +500,243 @@ app.post('/toggle-checkout/:id', (req, res) => {
 });
 
 
+app.post('/add-bag', checkAuthentication, (req, res) => {
+    const { name, is_primary } = req.body;
+    const userId = req.session.user.id;
+
+    const sql = `INSERT INTO bags (user_id, name) VALUES (?, ?)`;
+    db.run(sql, [userId, name], function (err) {
+        if (err) {
+            console.error("Database error when adding bag:", err.message);
+            return res.status(500).send("Failed to add bag due to database error.");
+        }
+        res.redirect('/bag-management');
+    });
+});
+
+app.delete('/remove-bag/:bagId', checkAuthentication, (req, res) => {
+    const { bagId } = req.params;
+    const userId = req.session.user.id;
+
+    const sql = `DELETE FROM bags WHERE id = ? AND user_id = ?`;
+    db.run(sql, [bagId, userId], function (err) {
+        if (err) {
+            console.error("Database error when removing bag:", err.message);
+            return res.status(500).json({ success: false, message: "Failed to remove bag due to database error." });
+        }
+        res.json({ success: true, message: "Bag removed successfully." });
+    });
+});
 
 
+// Route to remove a disc from a bag
+app.post('/remove-disc-from-bag/:bagId/:discId', checkAuthentication, (req, res) => {
+    const { bagId, discId } = req.params;
+    const sql = `DELETE FROM discs_bags WHERE bag_id = ? AND disc_id = ?`;
+    db.run(sql, [bagId, discId], function (err) {
+        if (err) {
+            console.error("Database error when removing disc from bag:", err.message);
+            return res.status(500).send("Failed to remove disc from bag due to database error.");
+        }
+        res.redirect(`/bag-details/${bagId}`);
+    });
+});
+
+app.post('/new/remove-disc-from-bag/:bagId/:discId', checkAuthentication, (req, res) => {
+    const { bagId, discId } = req.params;
+    const sql = `DELETE FROM discs_bags WHERE bag_id = ? AND disc_id = ?`;
+    db.run(sql, [bagId, discId], function (err) {
+        if (err) {
+            console.error("Database error when removing disc from bag:", err.message);
+            return res.status(500).send("Failed to remove disc from bag due to database error.");
+        }
+        res.json({ success: true, message: "Disc successfully removed from the bag." });
+    });
+});
+
+// Route to add a disc to a bag via AJAX
+app.post('/new/add-disc-to-bag/:bagId/:discId', checkAuthentication, express.json(), (req, res) => {
+    const { bagId, discId } = req.params;
+    const sql = `INSERT INTO discs_bags (bag_id, disc_id) VALUES (?, ?)`;
+    db.run(sql, [bagId, discId], function (err) {
+        if (err) {
+            console.error("Database error when adding disc to bag:", err.message);
+            return res.status(500).json({ error: "Failed to add disc to bag due to database error." });
+        }
+        res.json({ success: true, message: "Disc added to bag successfully" });
+    });
+});
+// Route to add a disc to a bag via AJAX
+app.post('/add-disc-to-bag', checkAuthentication, express.json(), (req, res) => {
+    const { bagId, discId } = req.body;
+    const sql = `INSERT INTO discs_bags (bag_id, disc_id) VALUES (?, ?)`;
+    db.run(sql, [bagId, discId], function (err) {
+        if (err) {
+            console.error("Database error when adding disc to bag:", err.message);
+            return res.status(500).json({ error: "Failed to add disc to bag due to database error." });
+        }
+        res.json({ success: true, message: "Disc added to bag successfully" });
+    });
+});
+
+// API to search discs by name (for the searchable list)
+app.get('/api/discs', checkAuthentication, (req, res) => {
+    const search = req.query.search;
+    const sql = "SELECT id, name FROM discs WHERE user_id = ? AND name LIKE ?";
+    db.all(sql, [req.session.user.id, '%' + search + '%'], (err, discs) => {
+        if (err) {
+            console.error("Database error when searching for discs:", err);
+            return res.status(500).json({ error: "Failed to search discs due to database error." });
+        }
+        res.json(discs);
+    });
+});
+
+
+
+app.post('/toggle-bag-checkout/:bagId', checkAuthentication, (req, res) => {
+    const bagId = req.params.bagId;
+    const userId = req.session.user.id;  // Assuming `req.user` contains the authenticated user's info
+
+    db.get(`SELECT checked_out FROM bags WHERE id = ? AND user_id = ?`, [bagId, userId], (err, bag) => {
+        if (err) {
+            console.error("Database error when fetching bag:", err);
+            return res.status(500).send("Database error");
+        }
+        if (!bag) {
+            return res.status(404).send("Bag not found");
+        }
+
+        if (bag.checked_out) {
+            // If trying to check in, allow
+            toggleBagCheckedOut(bag);
+        } else {
+            // If trying to check out, ensure no other bags are checked out
+            db.get(`SELECT id FROM bags WHERE user_id = ? AND checked_out = 1`, [userId], (err, result) => {
+                if (err) {
+                    console.error("Database error:", err);
+                    return res.status(500).send("Database error");
+                }
+                if (result) {
+                    return res.status(400).json({ success: false, message: "Another bag is already checked out." });
+                } else {
+                    toggleBagCheckedOut(bag);
+                }
+            });
+        }
+    });
+
+    function toggleBagCheckedOut(bag) {
+        const newCheckedOut = !bag.checked_out;
+        db.run(`UPDATE bags SET checked_out = ? WHERE id = ?`, [newCheckedOut, bagId], function (err) {
+            if (err) {
+                console.error("Database error when updating bag checkout status:", err);
+                return res.status(500).send("Failed to update bag checkout status.");
+            }
+            // Update all discs in the bag
+            db.run(`UPDATE discs SET checked_out = ? WHERE id IN (SELECT disc_id FROM discs_bags WHERE bag_id = ?)`, [newCheckedOut, bagId], (err) => {
+                if (err) {
+                    console.error("Database error when updating discs checkout status:", err);
+                    return res.status(500).send("Failed to update discs checkout status.");
+                }
+                // Respond with the new checked_out status
+                res.json({ success: true, message: "Bag and discs checkout status updated successfully", checked_out: newCheckedOut });
+            });
+        });
+    }
+});
+
+
+
+
+app.get('/bag-management', checkAuthentication, (req, res) => {
+    const sql = `SELECT * FROM bags WHERE user_id = ?`;
+    db.all(sql, [req.session.user.id], (err, bags) => {
+        if (err) {
+            console.error("Database error when fetching bags:", err);
+            res.render('error', { message: 'Failed to load bags.' });
+        } else {
+            res.render('bag-management', { user: req.session.user, bags: bags });
+        }
+    });
+});
+
+app.get('/bag-details/:bagId', checkAuthentication, (req, res) => {
+    const bagId = req.params.bagId;
+    db.get(`SELECT * FROM bags WHERE id = ? AND user_id = ?`, [bagId, req.session.user.id], (err, bag) => {
+        if (err || !bag) {
+            console.error("Database error or bag not found:", err);
+            return res.status(404).send("Bag not found");
+        }
+        db.all(`SELECT discs.* FROM discs JOIN discs_bags ON discs.id = discs_bags.disc_id WHERE discs_bags.bag_id = ?`, [bagId], (err, discs) => {
+            if (err) {
+                console.error("Database error when fetching discs in bag:", err);
+                return res.status(500).send("Failed to fetch discs");
+            }
+            res.render('bag-details', { user: req.session.user, bag: bag, discs: discs });
+        });
+    });
+});
+
+app.post('/set-primary-bag/:bagId', checkAuthentication, (req, res) => {
+    const { bagId } = req.params;
+    const userId = req.session.user.id;
+
+    // Start a transaction to ensure data integrity
+    db.serialize(() => {
+        // Reset primary status for all bags of the user
+        const resetPrimary = `UPDATE bags SET is_primary = 0 WHERE user_id = ?`;
+        db.run(resetPrimary, [userId], function (err) {
+            if (err) {
+                console.error("Error resetting primary bags:", err.message);
+                return res.status(500).json({ error: "Failed to update primary status." });
+            }
+
+            // Set the selected bag as the primary bag
+            const setPrimary = `UPDATE bags SET is_primary = 1 WHERE id = ? AND user_id = ?`;
+            db.run(setPrimary, [bagId, userId], function (err) {
+                if (err) {
+                    console.error("Error setting bag as primary:", err.message);
+                    return res.status(500).json({ error: "Failed to set bag as primary." });
+                }
+                if (this.changes === 0) {
+                    res.status(404).json({ error: "Bag not found or not available." });
+                } else {
+                    res.json({ success: true, message: "Primary bag updated successfully." });
+                }
+            });
+        });
+    });
+});
+
+// Assuming you have already defined your express app and database connection
+
+// Route to check if a disc is in a bag
+app.get('/check-disc-in-bag/:bagId/:discId', (req, res) => {
+    const bagId = req.params.bagId;
+    const discId = req.params.discId;
+
+    const sql = `
+        SELECT COUNT(*) AS count
+        FROM discs_bags
+        WHERE bag_id = ? AND disc_id = ?
+    `;
+    db.get(sql, [bagId, discId], (err, row) => {
+        if (err) {
+            console.error('Database error:', err.message);
+            res.status(500).json({ success: false, error: 'Database error' });
+            return;
+        }
+
+        if (row.count > 0) {
+            // Disc is in the bag
+            res.json({ success: true, inBag: true });
+        } else {
+            // Disc is not in the bag
+            res.json({ success: true, inBag: false });
+        }
+    });
+});
 
 // Middleware to check if the user is authenticated
 function checkAuthentication(req, res, next) {
@@ -376,7 +751,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
 app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
 
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on https://0.0.0.0:${PORT}/`);
 });
