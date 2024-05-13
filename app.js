@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const path = require('path');
 const app = express();
-const PORT = process.env.PORT || 800;
+const PORT = process.env.PORT || 80;
 const SQLiteStore = require('connect-sqlite3')(session);
 const multer = require('multer');
 const fs = require('fs');
@@ -646,6 +646,18 @@ app.post('/toggle-bag-checkout/:bagId', checkAuthentication, (req, res) => {
     }
 });
 
+app.get('/get-bags', checkAuthentication, (req, res) => {
+    const userId = req.session.user.id;
+    const sql = 'SELECT * FROM bags WHERE user_id = ?';
+    db.all(sql, [userId], (err, bags) => {
+        if (err) {
+            console.error('Error fetching bags:', err);
+            res.status(500).json({ error: 'Failed to fetch bags' });
+        } else {
+            res.json(bags);
+        }
+    });
+});
 
 
 

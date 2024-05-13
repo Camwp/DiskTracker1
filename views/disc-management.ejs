@@ -106,11 +106,14 @@
                         <div class="row mb-2 border rounded p-2" style="cursor: pointer;" data-disc-id="<%= disc.id %>">
                             <div class="col-md-3">
                                 <img src="<%= disc.imageUrl || '/uploads/defaultDiscImage.png' %>" alt="Disc Image"
-                                    class="img-thumbnail">
+                                    class="img-thumbnail" style="background-color: <%= disc.color %>;">
                             </div>
                             <div class="col-md-9">
                                 <div class="row">
                                     <div class="col-md-4" id="textDetailsRow">
+                                        <p class="textDetails"><strong>Manufacturer:</strong>
+                                            <%= disc.manufacturer %>
+                                        </p>
                                         <p class="textDetails"><strong>Name:</strong>
                                             <%= disc.name %>
                                         </p>
@@ -123,10 +126,10 @@
                                         </p>
                                         <p class="textDetails"><strong>Weight:</strong>
                                             <%= disc.weight %> grams
-                                        </p>
+                                        </p><!--
                                         <p><strong>Color:</strong> <span class="color-indicator"
                                                 style="display: inline-block; width: 20px; height: 20px; background-color: <%= disc.color %>;"></span>
-                                        </p>
+                                        </p>-->
                                     </div>
                                     <div class="col-md-4">
                                         <p><strong>Stabilty:</strong>
@@ -159,20 +162,15 @@
                                         <button class="btn btn-info checkout-btn" data-disc-id="<%= disc.id %>">
                                             <%= disc.checked_out ? 'Check In' : 'Check Out' %>
                                         </button>
+                                        <button type="button" class="btn btn-info addToBagBtn"
+                                            data-disc-id="<%= disc.id %>">Add to Bag</button>
+                                        <button style="display: none;" type="button" class="removeFromBagBtn"
+                                            data-disc-id="<%= disc.id %>" return false;>Remove from Bag</button>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <select class="bag-option">
-                                    <% bags.forEach(bag=> { %>
-                                        <option value="<%= bag.id %>">
-                                            <%= bag.name %>
-                                        </option>
-                                        <% }); %>
-                                </select>
-                                <button type="button" class="addToBagBtn">Add to Bag</button>
-                                <button style="display: none;" type="button" class="removeFromBagBtn" return
-                                    false;>Remove from Bag</button>
+
                             </div>
 
                         </div>

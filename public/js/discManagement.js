@@ -109,9 +109,10 @@ document.addEventListener('DOMContentLoaded', function () {
 document.querySelectorAll('.addToBagBtn').forEach(button => {
     button.addEventListener('click', function (event) {
         event.stopPropagation(); // Prevent propagation of the click event to parent elements
-        addToBag(event); // Call the addToBag function
+        showBagList(event); // Call the showBagList function with the event
     });
 });
+
 
 // Add event listener to update button text when a bag option is selected
 document.querySelectorAll('.bag-option').forEach(option => {
@@ -176,7 +177,7 @@ function removeFromBag(event) {
 
 
 
-function addToBag(event) {
+function addDiscToBag(event) {
     event.preventDefault(); // Prevent default form submission behavior
 
     const selectedBagId = event.target.parentElement.querySelector('.bag-option').value;
@@ -205,6 +206,82 @@ function addToBag(event) {
 function getSelectedDiscId() {
     // Implement this function to get the ID of the selected disc
     // For example, you can use data attributes or other methods to store the disc ID in the HTML
+}
+
+
+function showBagList(event) {
+    event.preventDefault(); // Prevent default form submission behavior
+
+    const discId = document.querySelector('.addToBagBtn').getAttribute('data-disc-id');
+
+    fetch('/get-bags')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch bags');
+            }
+            return response.json();
+        })
+        .then(bags => {
+            // Create a modal to display the bags list
+            const modal = `
+                <div class="modal" id="bagsModal">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Select Bag</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="bags">
+                                    ${bags.map(bag => `<button class="bag-option btn btn-primary" data-bs-dismiss="modal" data-bag-id="${bag.id}">${bag.name}</button>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modal);
+
+            // Initialize the modal using Bootstrap's JavaScript
+            const bagsModal = new bootstrap.Modal(document.getElementById('bagsModal'));
+            bagsModal.show();
+
+            // Add event listeners to bag buttons to handle adding the disc to the selected bag
+            document.querySelectorAll('.bag-option').forEach(button => {
+                button.addEventListener('click', () => {
+                    const bagId = button.getAttribute('data-bag-id');
+                    addToBag(discId, bagId);
+                });
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching bags:', error);
+            alert('Failed to fetch bags');
+        });
+}
+
+function addToBag(dId, bagId) {
+
+    const selectedBagId = bagId;
+    const discId = dId;
+    console.log(discId, dId);
+
+    // Perform the action to add or remove the disc from the selected bag
+    fetch(`/new/add-disc-to-bag/${selectedBagId}/${discId}`, {
+        method: 'POST'
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Disc action successful.');
+            } else {
+                alert('Failed to perform disc action.');
+            }
+        })
+        .catch(error => {
+            console.error('Error performing disc action:', error);
+            alert('Error performing disc action.');
+        });
 }
 
 

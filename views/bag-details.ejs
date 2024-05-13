@@ -38,7 +38,7 @@
             <script>
                 document.getElementById('discSearch').addEventListener('input', function (e) {
                     const searchValue = e.target.value;
-                    if (searchValue.length > 2) { // Start searching after 2 characters
+                    if (searchValue.length > 1) { // Start searching after 2 characters
                         fetch(`/api/discs?search=${searchValue}`)
                             .then(response => response.json())
                             .then(discs => {
