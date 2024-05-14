@@ -210,6 +210,7 @@ app.get('/profile', checkAuthentication, (req, res) => {
                         profileData.bagCount = bags.bagCount;
                     }
 
+
                     // Render the profile page with all gathered data
                     res.render('profile', profileData);
                 });
@@ -310,19 +311,45 @@ app.post('/update-profile', (req, res) => {
     const { username, email } = req.body;
     const userId = req.session.user.id;
 
-    const sql = `UPDATE users SET username = ?, email = ? WHERE id = ?`;
-    db.run(sql, [username, email, userId], function (err) {
+    // Check if the new username is already in use
+    db.get('SELECT * FROM users WHERE username = ?', [username], (err, row) => {
         if (err) {
-            console.error("Error updating user:", err.message);
-            res.redirect('/profile?error=Unable to update profile');
-        } else {
-            // Update session with new user info
-            req.session.user.username = username;
-            req.session.user.email = email;
-            res.redirect('/profile?success=Profile updated successfully');
+            console.error("Error checking username:", err.message);
+            return res.redirect('/profile?error=Unable to update profile');
         }
+        if (row && row.id !== userId) {
+            // Username is already in use
+            return res.redirect('/profile?error=Username is already in use');
+        }
+
+        // Check if the new email is already in use
+        db.get('SELECT * FROM users WHERE email = ?', [email], (err, row) => {
+            if (err) {
+                console.error("Error checking email:", err.message);
+                return res.redirect('/profile?error=Unable to update profile');
+            }
+            if (row && row.id !== userId) {
+                // Email is already in use
+                return res.redirect('/profile?error=Email is already in use');
+            }
+
+            // Update the user's profile
+            const sql = 'UPDATE users SET username = ?, email = ? WHERE id = ?';
+            db.run(sql, [username, email, userId], function (err) {
+                if (err) {
+                    console.error("Error updating user:", err.message);
+                    return res.redirect('/profile?error=Unable to update profile');
+                }
+
+                // Update session with new user info
+                req.session.user.username = username;
+                req.session.user.email = email;
+                res.redirect('/profile?success=Profile updated successfully');
+            });
+        });
     });
 });
+
 
 app.post('/register', (req, res) => {
     const { username, email, password } = req.body;
@@ -792,7 +819,7 @@ app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/
 
 
 
-let dev = true;
+let dev = false;
 if (dev) {
     // Start the HTTP server
     http.createServer(app).listen(DEVPORT, '0.0.0.0', () => {

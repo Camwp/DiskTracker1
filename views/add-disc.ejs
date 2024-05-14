@@ -187,8 +187,20 @@
 
                 <div class="mb-3">
                     <label for="color" class="form-label">Color</label>
-                    <input type="color" class="form-control form-control-color" id="color" name="color" value="#ff0000">
+                    <select id="color" class="form-control" id="color" name="color">
+                        <option value="">Select a Color</option>
+                        <option value="#ff0000" style="background-color: #ff0000;">Red</option>
+                        <option value="#ffa500" style="background-color: #ffa500;">Orange</option>
+                        <option value="#ffff00" style="background-color: #ffff00;">Yellow</option>
+                        <option value="#008000" style="background-color: #008000;">Green</option>
+                        <option value="#0000ff" style="background-color: #0000ff;">Blue</option>
+                        <option value="#4b0082" style="background-color: #4b0082;">Purple</option>
+                        <option value="#ee82ee" style="background-color: #ee82ee;">Pink</option>
+                        <option value="#000000" style="background-color: #000000;">Black</option>
+                        <option value="#ffffff" style="background-color: #ffffff;">White</option>
+                    </select>
                 </div>
+
                 <div class="mb-3">
                     <label for="discImage" class="form-label">Disc Image</label>
                     <input type="file" class="form-control" id="discImage" name="discImage" onchange="previewImage();">

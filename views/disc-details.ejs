@@ -60,8 +60,8 @@
                     margin: auto;
                 }
             </style>
-            <img src="<%= disc.imageUrl %>" style="cursor: pointer;" alt="Disc Image" class="img-thumbnail"
-                id="discImageDisplay">
+            <img src="<%= disc.imageUrl %>" style="cursor: pointer;  background-color: <%= disc.color %>;"
+                alt="Disc Image" class="img-thumbnail" id="discImageDisplay">
             <input type="file" id="discImage" name="discImage" accept="image/*" style="display: none;">
             <button type="button" class="btn btn-primary" id="uploadImageButton" style="display: none;">Upload
                 Image</button>
@@ -220,12 +220,46 @@
                     <input type="range" class="form-range" id="fade" name="fade" min="0" max="5"
                         value="<%= disc.fade %>" oninput="updateSliderValue(this.id, this.value)" required disabled>
                 </div>
-
+                <!--
                 <div class="mb-3">
                     <label for="color" class="form-label">Color</label>
                     <input type="color" class="form-control form-control-color" id="color" name="color"
                         value="<%= disc.color %>" required disabled>
+                </div>-->
+                <div class="mb-3">
+                    <label for="color" class="form-label">Color</label>
+                    <select id="color" class="form-control" name="color" id="color">
+                        <option value="">Select a Color</option>
+                        <option value="#ff0000" style="background-color: #ff0000;" <%=disc.color==='#ff0000'
+                            ? 'selected' : '' %>>Red
+                        </option>
+                        <option value="#ffa500" style="background-color: #ffa500;" <%=disc.color==='#ffa500'
+                            ? 'selected' : '' %>>Orange
+                        </option>
+                        <option value="#ffff00" style="background-color: #ffff00;" <%=disc.color==='#ffff00'
+                            ? 'selected' : '' %>>Yellow
+                        </option>
+                        <option value="#008000" style="background-color: #008000;" <%=disc.color==='#008000'
+                            ? 'selected' : '' %>>Green
+                        </option>
+                        <option value="#0000ff" style="background-color: #0000ff;" <%=disc.color==='#0000ff'
+                            ? 'selected' : '' %>>Blue
+                        </option>
+                        <option value="#4b0082" style="background-color: #4b0082;" <%=disc.color==='#4b0082'
+                            ? 'selected' : '' %>>Purple
+                        </option>
+                        <option value="#ee82ee" style="background-color: #ee82ee;" <%=disc.color==='#ee82ee'
+                            ? 'selected' : '' %>>Pink
+                        </option>
+                        <option value="#000000" style="background-color: #000000;" <%=disc.color==='#000000'
+                            ? 'selected' : '' %>>Black
+                        </option>
+                        <option value="#ffffff" style="background-color: #ffffff;" <%=disc.color==='#ffffff'
+                            ? 'selected' : '' %>>White
+                        </option>
+                    </select>
                 </div>
+
                 <button type="button" class="btn btn-primary" id="editButton">Edit</button>
                 <button type="submit" class="btn btn-success" id="saveButton" style="display: none;">Save
                     Changes</button>
@@ -343,25 +377,31 @@
         </script>
         <style>
             select {
-    -webkit-appearance: none; /* Disable default appearance */
-    -moz-appearance: none;
-    appearance: none;
-    padding: 0.5rem; /* Add padding to make the dropdowns clickable */
-    background-color: transparent; /* Set a transparent background */
-    border: 1px solid #ccc; /* Add a border for better visibility */
-    border-radius: 4px; /* Optional: Add some border radius for a rounded look */
-}
+                -webkit-appearance: none;
+                /* Disable default appearance */
+                -moz-appearance: none;
+                appearance: none;
+                padding: 0.5rem;
+                /* Add padding to make the dropdowns clickable */
+                background-color: transparent;
+                /* Set a transparent background */
+                border: 1px solid #ccc;
+                /* Add a border for better visibility */
+                border-radius: 4px;
+                /* Optional: Add some border radius for a rounded look */
+            }
 
-/* Style the dropdown arrow */
-select::after {
-    content: '\25BC'; /* Unicode character for a down arrow */
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    pointer-events: none; /* Ensure the arrow doesn't interfere with clicking the dropdown */
-}
-
+            /* Style the dropdown arrow */
+            select::after {
+                content: '\25BC';
+                /* Unicode character for a down arrow */
+                position: absolute;
+                top: 50%;
+                right: 10px;
+                transform: translateY(-50%);
+                pointer-events: none;
+                /* Ensure the arrow doesn't interfere with clicking the dropdown */
+            }
         </style>
         <script>
             function updateSliderValue(id, value) {
@@ -491,6 +531,8 @@ select::after {
                             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                             const color = colorAverage(imageData.data);
                             document.getElementById('color').value = color;
+
+
                             document.getElementById('discImage').files = dataTransfer.files; // Set the file to input
                             document.getElementById('discImageDisplay').src = URL.createObjectURL(blob); // Update display image
                             document.getElementById('uploadImageButton').style.display = 'block';
@@ -501,6 +543,8 @@ select::after {
                     cameraButton.click(); // Close the camera after capturing the photo
                 }
             };
+
+
 
 
         </script>
