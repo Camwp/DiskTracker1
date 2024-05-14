@@ -278,15 +278,16 @@ app.get('/api/manufacturers', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-    const { email, password, remember } = req.body; // Make sure the 'remember' checkbox sends this data
-    const sql = `SELECT id, username, email, password FROM users WHERE email = ?`;
+    const { email, password, remember } = req.body;
+    const lowerEmailOrUsername = email.toLowerCase(); // Convert username to lowercase
+    const sql = `SELECT id, username, email, password FROM users WHERE email = ? OR username = ?`;
 
-    db.get(sql, [email], (err, user) => {
+    db.get(sql, [lowerEmailOrUsername, lowerEmailOrUsername], (err, user) => {
         if (err) {
             return res.status(500).json({ error: "Database error" });
         }
         if (!user || !bcrypt.compareSync(password, user.password)) {
-            return res.status(401).json({ error: "Invalid email or password" });
+            return res.status(401).json({ error: "Invalid email/username or password" });
         }
         req.session.user = {
             id: user.id,
@@ -294,9 +295,9 @@ app.post('/login', (req, res) => {
             email: user.email
         };
         if (remember) {
-            req.session.cookie.maxAge = 90 * 24 * 60 * 60 * 1000; // Extend session to 90 days
+            req.session.cookie.maxAge = 90 * 24 * 60 * 60 * 1000;
         } else {
-            req.session.cookie.expires = false; // Session ends when the browser closes
+            req.session.cookie.expires = false;
         }
         req.session.save(err => {
             if (err) {
@@ -306,6 +307,7 @@ app.post('/login', (req, res) => {
         });
     });
 });
+
 
 app.post('/update-profile', (req, res) => {
     const { username, email } = req.body;
@@ -327,19 +329,34 @@ app.post('/update-profile', (req, res) => {
 
 app.post('/register', (req, res) => {
     const { username, email, password } = req.body;
-    const hashedPassword = bcrypt.hashSync(password, 10);  // Ensure bcrypt is correctly required at the top
+    const lowerUsername = username.toLowerCase(); // Convert username to lowercase
+    const lowerEmail = email.toLowerCase(); // Convert email to lowercase
+    const hashedPassword = bcrypt.hashSync(password, 10);
 
-    const sql = `INSERT INTO users (username, email, password) VALUES (?, ?, ?)`;
-    db.run(sql, [username, email, hashedPassword], function (err) {
+    // Check if email or username already exists
+    const checkSql = `SELECT COUNT(*) as count FROM users WHERE email = ? OR username = ?`;
+    db.get(checkSql, [lowerEmail, lowerUsername], (err, result) => {
         if (err) {
             console.error("DB Error: ", err.message);
-            res.render('/', { error: "Email already exists or other database error." });
-        } else {
-            req.session.user = { id: this.lastID, username, email };  // Set user in session
-            res.redirect('/');
+            return res.status(500).json({ error: "Database error" });
         }
+        if (result.count > 0) {
+            return res.status(400).json({ error: "Email or username already exists" });
+        }
+
+        // Insert the new user
+        const insertSql = `INSERT INTO users (username, email, password) VALUES (?, ?, ?)`;
+        db.run(insertSql, [lowerUsername, lowerEmail, hashedPassword], function (err) {
+            if (err) {
+                console.error("DB Error: ", err.message);
+                return res.status(500).json({ error: "Failed to register user" });
+            }
+            req.session.user = { id: this.lastID, username: lowerUsername, email: lowerEmail };
+            res.redirect('/');
+        });
     });
 });
+
 
 app.get('/logout', (req, res) => {
     req.session.destroy(err => {
