@@ -16,12 +16,9 @@ const csv = require('csv-parse');
 const https = require('https');
 const http = require('http');
 
-const httpsOptions = {
-    key: fs.readFileSync('/etc/letsencrypt/live/discvault.app/privkey.pem'),
-    cert: fs.readFileSync('/etc/letsencrypt/live/discvault.app/fullchain.pem')
-};
 
-const server = https.createServer(httpsOptions, app);
+
+
 
 
 
@@ -541,8 +538,19 @@ app.delete('/remove-bag/:bagId', checkAuthentication, (req, res) => {
     db.run(sql, [bagId, userId], function (err) {
         if (err) {
             console.error("Database error when removing bag:", err.message);
+
             return res.status(500).json({ success: false, message: "Failed to remove bag due to database error." });
+        } else {
+            db.run('DELETE FROM discs_bags WHERE bag_id = ?', [bagId], (err) => {
+                if (err) {
+                    console.error(err.message);
+                } else {
+                    console.log('Bag and associated discs removed successfully');
+                }
+            });
         }
+
+
         res.json({ success: true, message: "Bag removed successfully." });
     });
 });
@@ -782,13 +790,21 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
 app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
 
-let dev = false;
+
+
+let dev = true;
 if (dev) {
     // Start the HTTP server
     http.createServer(app).listen(DEVPORT, '0.0.0.0', () => {
         console.log(`Server running on http://0.0.0.0:${DEVPORT}/`);
     });
 } else {
+    const httpsOptions = {
+        key: fs.readFileSync('/etc/letsencrypt/live/discvault.app/privkey.pem'),
+        cert: fs.readFileSync('/etc/letsencrypt/live/discvault.app/fullchain.pem')
+    };
+
+    const server = https.createServer(httpsOptions, app);
     server.listen(PORT, '0.0.0.0', () => {
         console.log(`Server running on https://0.0.0.0:${PORT}/`);
     });

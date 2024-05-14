@@ -90,15 +90,42 @@
             </div>
         </div>
         <%- include('partials/footer') %>
-            <script src="/js/bootstrap.bundle.min.js"></script>
+            <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmModalLabel">Confirm Action</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Are you sure you want to remove this bag?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-danger" id="confirmRemove">Remove</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
                     const removeButtons = document.querySelectorAll('.removeBag');
+                    const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+
+                    console.log('Confirm Modal:', confirmModal); // Check if the modal is correctly initialized
 
                     removeButtons.forEach(button => {
                         button.addEventListener('click', function () {
                             const bagId = this.getAttribute('data-bag-id');
-                            if (confirm("Are you sure you want to remove this bag?")) {
+                            confirmModal.show();
+
+                            document.getElementById('confirmRemove').addEventListener('click', function () {
                                 fetch('/remove-bag/' + bagId, {
                                     method: 'DELETE',
                                     headers: {
@@ -108,20 +135,38 @@
                                     .then(response => response.json())
                                     .then(data => {
                                         if (data.success) {
-                                            alert('Bag removed successfully!');
+                                            //alert('Bag removed successfully!');
                                             location.reload();  // Reload the page to update the list
                                         } else {
-                                            alert('Failed to remove the bag: ' + data.message);
+                                            console.log('Failed to remove the bag')
+                                            //alert('Failed to remove the bag: ' + data.message);
                                         }
                                     })
                                     .catch(error => {
                                         console.error('Error removing bag:', error);
-                                        alert('Error removing the bag.');
+                                        //alert('Error removing the bag.');
                                     });
-                            }
+
+                                confirmModal.hide();
+                            });
+
+                            // Add event listener for the Cancel button
+                            document.querySelector('.modal-footer .btn-secondary').addEventListener('click', function () {
+                                confirmModal.hide();
+                            });
+
+                            // Add event listener for the close button (x)
+                            document.querySelector('.modal-header .close').addEventListener('click', function () {
+                                confirmModal.hide();
+                            });
+
                         });
                     });
                 });
+
+
+
+
 
 
                 document.addEventListener('DOMContentLoaded', function () {
@@ -176,7 +221,9 @@
 
 
             </script>
+            <script src="/js/bootstrap.bundle.min.js"></script>
 </body>
+
 
 
 
