@@ -6,17 +6,19 @@ const session = require('express-session');
 const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 443;
+const DEVPORT = process.env.PORT || 80;
+
 const SQLiteStore = require('connect-sqlite3')(session);
 const multer = require('multer');
 const fs = require('fs');
 const uploadPath = './public/uploads';
 const csv = require('csv-parse');
 const https = require('https');
-
+const http = require('http');
 
 const httpsOptions = {
-    key: fs.readFileSync('./server.key', 'utf8'),
-    cert: fs.readFileSync('./server.cert', 'utf8')
+    key: fs.readFileSync('./server.key'),
+    cert: fs.readFileSync('./server.cert')
 };
 
 const server = https.createServer(httpsOptions, app);
@@ -763,6 +765,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
 app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
 
-server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on https://0.0.0.0:${PORT}/`);
-});
+let dev = true
+if (dev) {
+    // Start the HTTP server
+    http.createServer(app).listen(DEVPORT, '0.0.0.0', () => {
+        console.log(`Server running on http://0.0.0.0:${DEVPORT}/`);
+    });
+} else {
+    server.listen(PORT, '0.0.0.0', () => {
+        console.log(`Server running on https://0.0.0.0:${PORT}/`);
+    });
+
+}
+
+
