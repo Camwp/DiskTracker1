@@ -17,8 +17,8 @@ const https = require('https');
 const http = require('http');
 
 const httpsOptions = {
-    key: fs.readFileSync('./server.key'),
-    cert: fs.readFileSync('./server.cert')
+    key: fs.readFileSync('/etc/letsencrypt/live/discvault.app/privkey.pem'),
+    cert: fs.readFileSync('/etc/letsencrypt/live/discvault.app/fullchain.pem')
 };
 
 const server = https.createServer(httpsOptions, app);
@@ -782,7 +782,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
 app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
 
-let dev = true
+let dev = false;
 if (dev) {
     // Start the HTTP server
     http.createServer(app).listen(DEVPORT, '0.0.0.0', () => {
