@@ -39,17 +39,38 @@
                     </select>
                     <select id="filterColor" class="form-control">
                         <option value="">All Colors</option>
-                        <option value="#ff0000" style="background-color: #ff0000;">&nbsp;</option>
-                        <option value="#ffa500" style="background-color: #ffa500;">&nbsp;</option>
-                        <option value="#ffff00" style="background-color: #ffff00;">&nbsp;</option>
-                        <option value="#008000" style="background-color: #008000;">&nbsp;</option>
-                        <option value="#0000ff" style="background-color: #0000ff;">&nbsp;</option>
-                        <option value="#4b0082" style="background-color: #4b0082;">&nbsp;</option>
-                        <option value="#ee82ee" style="background-color: #ee82ee;">&nbsp;</option>
-                        <option value="#000000" style="background-color: #000000;">&nbsp;</option>
-                        <option value="#ffffff" style="background-color: #ffffff;">&nbsp;</option>
+                        <option value="#ff0000" style="background-color: #ff0000;">Red</option>
+                        <option value="#ffa500" style="background-color: #ffa500;">Orange</option>
+                        <option value="#ffff00" style="background-color: #ffff00;">Yellow</option>
+                        <option value="#008000" style="background-color: #008000;">Green</option>
+                        <option value="#0000ff" style="background-color: #0000ff;">Blue</option>
+                        <option value="#4b0082" style="background-color: #4b0082;">Purple</option>
+                        <option value="#ee82ee" style="background-color: #ee82ee;">Pink</option>
+                        <option value="#000000" style="background-color: #000000;">Black</option>
+                        <option value="#ffffff" style="background-color: #ffffff;">White</option>
                     </select>
+<style>
+    select {
+    -webkit-appearance: none; /* Disable default appearance */
+    -moz-appearance: none;
+    appearance: none;
+    padding: 0.5rem; /* Add padding to make the dropdowns clickable */
+    background-color: transparent; /* Set a transparent background */
+    border: 1px solid #ccc; /* Add a border for better visibility */
+    border-radius: 4px; /* Optional: Add some border radius for a rounded look */
+}
 
+/* Style the dropdown arrow */
+select::after {
+    content: '\25BC'; /* Unicode character for a down arrow */
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    pointer-events: none; /* Ensure the arrow doesn't interfere with clicking the dropdown */
+}
+
+</style>
                 </div>
                 <div class="button-row mt-2">
                     <button id="applyFilters" class="btn btn-primary">Apply Filters</button>

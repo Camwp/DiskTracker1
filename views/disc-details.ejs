@@ -341,6 +341,28 @@
             }
 
         </script>
+        <style>
+            select {
+    -webkit-appearance: none; /* Disable default appearance */
+    -moz-appearance: none;
+    appearance: none;
+    padding: 0.5rem; /* Add padding to make the dropdowns clickable */
+    background-color: transparent; /* Set a transparent background */
+    border: 1px solid #ccc; /* Add a border for better visibility */
+    border-radius: 4px; /* Optional: Add some border radius for a rounded look */
+}
+
+/* Style the dropdown arrow */
+select::after {
+    content: '\25BC'; /* Unicode character for a down arrow */
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    pointer-events: none; /* Ensure the arrow doesn't interfere with clicking the dropdown */
+}
+
+        </style>
         <script>
             function updateSliderValue(id, value) {
                 document.getElementById(id + 'Value').innerText = value;
