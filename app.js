@@ -148,9 +148,36 @@ initDb();
 
 // Routes
 app.get('/', (req, res) => {
-    console.log(req.session.user); // Check what's actually in your session
+    console.log('hi', req.session.user); // Check what's actually in your session
     res.render('index', { user: req.session.user || null });
 });
+
+
+app.get('/admin', (req, res) => {
+    if (!req.session.user || !req.session.user.is_admin) {
+        return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const sql = `SELECT users.id, users.username, users.email, 
+                        COUNT(DISTINCT discs.id) AS disc_count, 
+                        COUNT(DISTINCT bags.id) AS bag_count
+                 FROM users
+                 LEFT JOIN discs ON users.id = discs.user_id
+                 LEFT JOIN bags ON users.id = bags.user_id
+                 GROUP BY users.id`;
+
+    db.all(sql, (err, usersWithCounts) => {
+        console.log(usersWithCounts);
+        if (err) {
+            return res.status(500).json({ error: "Database error" });
+        }
+
+        res.render('admin', { users: usersWithCounts, user: req.session.user });
+    });
+});
+
+
+
 
 
 app.get('/register', (req, res) => {
@@ -278,7 +305,7 @@ app.get('/api/manufacturers', (req, res) => {
 app.post('/login', (req, res) => {
     const { email, password, remember } = req.body;
     const lowerEmailOrUsername = email.toLowerCase(); // Convert username to lowercase
-    const sql = `SELECT id, username, email, password FROM users WHERE email = ? OR username = ?`;
+    const sql = `SELECT id, username, email, password, is_admin FROM users WHERE email = ? OR username = ?`;
 
     db.get(sql, [lowerEmailOrUsername, lowerEmailOrUsername], (err, user) => {
         if (err) {
@@ -290,8 +317,10 @@ app.post('/login', (req, res) => {
         req.session.user = {
             id: user.id,
             username: user.username,
-            email: user.email
+            email: user.email,
+            is_admin: user.is_admin === 1  // Assuming is_admin is a boolean field in the database
         };
+        console.log('test', user.is_admin);
         if (remember) {
             req.session.cookie.maxAge = 90 * 24 * 60 * 60 * 1000;
         } else {
@@ -305,6 +334,7 @@ app.post('/login', (req, res) => {
         });
     });
 });
+
 
 
 app.post('/update-profile', (req, res) => {

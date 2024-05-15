@@ -5,10 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - Disc Golf Inventory</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 
 <body>
+    <!-- Include the header -->
     <%- include('partials/header', { title: 'Profile' , user: user }) %>
 
         <div class="container mt-5">
@@ -43,10 +46,11 @@
                                 <label for="email">Email:</label>
                                 <input type="email" id="email" name="email" value="<%= user.email %>" required>
                             </div>
-                            <button type="submit" class="btn">Update Profile</button>
+                            <button type="submit" class="btn btn-primary">Update Profile</button>
                         </form>
         </div>
 
+        <!-- Include the footer -->
         <%- include('partials/footer') %>
 </body>
 
