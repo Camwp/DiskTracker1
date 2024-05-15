@@ -8,6 +8,8 @@
     <!-- Include Bootstrap CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 <body>
@@ -18,7 +20,7 @@
             <h1>User Profile</h1>
             <p>Welcome, <%= user.username %>
             </p>
-
+            <hr>
             <% if (favoriteDisc) { %>
                 <h2>Your Favorite Disc</h2>
                 <div class="favorite-disc">
@@ -48,10 +50,136 @@
                             </div>
                             <button type="submit" class="btn btn-primary">Update Profile</button>
                         </form>
+                        <hr>
+                        <h2>Flight Numbers Graph</h2>
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="home-tab" data-bs-toggle="tab"
+                                    data-bs-target="#home" type="button" role="tab" aria-controls="home"
+                                    aria-selected="true">Graph</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                                <canvas id="flightNumbersChart" width="400" height="400"></canvas>
+
+                            </div>
+                        </div>
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function () {
+                                const tabContent = document.getElementById("myTabContent");
+                                const homeTab = document.getElementById("home-tab");
+
+                                // Hide the graph tab content
+                                tabContent.style.display = "none";
+
+                                // Show the graph tab content and fetch data when the tab is clicked
+                                homeTab.addEventListener("click", function () {
+                                    if (tabContent.style.display === "none") {
+                                        tabContent.style.display = "block";
+                                    };
+                                    fetch('/api/discs')
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            const discs = [
+                                                { name: "Disc1", speed: 7, glide: 5, turn: -1, fade: 1, color: "red" },
+                                                { name: "Disc2", speed: 9, glide: 4, turn: -2, fade: 3, color: "blue" },
+                                                // Add more discs here
+                                            ];
+
+                                            const ctx = document.getElementById('flightNumbersChart').getContext('2d');
+                                            const discChart = new Chart(ctx, {
+                                                type: 'scatter',
+                                                data: {
+                                                    datasets: data.map(disc => ({
+                                                        label: disc.name,
+                                                        data: [{ x: disc.speed, y: disc.glide, r: 5 }],
+                                                        backgroundColor: disc.color,
+                                                        pointRadius: 10,
+                                                    })),
+                                                },
+                                                options: {
+                                                    legend: {
+                                                        display: false,
+
+                                                    },
+
+
+                                                    scales: {
+                                                        x: {
+                                                            type: 'linear',
+                                                            position: 'bottom',
+                                                            min: 0,
+                                                            max: 15,
+                                                            title: {
+                                                                display: true,
+                                                                text: 'Speed',
+                                                            },
+                                                        },
+                                                        y: {
+                                                            type: 'linear',
+                                                            position: 'left',
+                                                            min: 0,
+                                                            max: 15,
+                                                            title: {
+                                                                display: true,
+                                                                text: 'Glide',
+                                                            },
+                                                        },
+                                                        turn: {
+                                                            type: 'linear',
+                                                            position: 'right',
+                                                            min: -5,
+                                                            max: 5,
+                                                            title: {
+                                                                display: true,
+                                                                text: 'Turn',
+                                                            },
+                                                        },
+                                                        fade: {
+                                                            type: 'linear',
+                                                            position: 'top',
+                                                            min: 0,
+                                                            max: 5,
+                                                            title: {
+                                                                display: true,
+                                                                text: 'Fade',
+                                                            },
+                                                        },
+                                                    },
+                                                    plugins: {
+                                                        legend: {
+                                                            display: false
+                                                        },
+                                                        tooltip: {
+                                                            callbacks: {
+                                                                label: (context) => {
+                                                                    const disc = data[context.datasetIndex]; // Get the disc for the current dataset
+                                                                    return `${disc.name} - ${disc.manufacturer} - ${disc.weight}g - ${disc.stability}`;
+                                                                },
+                                                            },
+                                                        },
+                                                    },
+
+                                                },
+                                            });
+
+
+
+                                        })
+                                        .catch(error => console.error('Error fetching disc data:', error));
+                                });
+                            });
+                        </script>
+
         </div>
 
         <!-- Include the footer -->
         <%- include('partials/footer') %>
+
+            <!-- Include Bootstrap JS -->
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+            <script src="/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

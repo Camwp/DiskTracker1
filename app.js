@@ -320,6 +320,7 @@ app.post('/login', (req, res) => {
             email: user.email,
             is_admin: user.is_admin === 1  // Assuming is_admin is a boolean field in the database
         };
+        req.session.userId = id;
         console.log('test', user.is_admin);
         if (remember) {
             req.session.cookie.maxAge = 90 * 24 * 60 * 60 * 1000;
@@ -663,18 +664,41 @@ app.post('/add-disc-to-bag', checkAuthentication, express.json(), (req, res) => 
     });
 });
 
-// API to search discs by name (for the searchable list)
-app.get('/api/discs', checkAuthentication, (req, res) => {
-    const search = req.query.search;
-    const sql = "SELECT id, name FROM discs WHERE user_id = ? AND name LIKE ?";
-    db.all(sql, [req.session.user.id, '%' + search + '%'], (err, discs) => {
+app.get('/api/discs', (req, res) => {
+    db.all('SELECT * FROM discs WHERE user_id = ?', [req.session.user.id], (err, rows) => {
         if (err) {
-            console.error("Database error when searching for discs:", err);
-            return res.status(500).json({ error: "Failed to search discs due to database error." });
+            console.error(err.message);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
         }
+        console.log(req.session.userId);
+
+        const discs = rows.map(row => {
+            return {
+                id: row.id,
+                manufacturer: row.manufacturer,
+                name: row.name,
+                weight: row.weight,
+                plastic_type: row.plastic_type,
+                disc_type: row.disc_type,
+                color: row.color,
+                checked_out: row.checked_out,
+                imageUrl: row.imageUrl,
+                speed: row.speed,
+                glide: row.glide,
+                turn: row.turn,
+                fade: row.fade,
+                stability: row.stability,
+                times_checked_out: row.times_checked_out,
+                stats: JSON.parse(row.stats)
+            };
+        });
+        console.log(discs);
+
         res.json(discs);
     });
 });
+
 
 
 
@@ -849,7 +873,7 @@ app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/
 
 
 
-let dev = true;
+let dev = false;
 if (dev) {
     // Start the HTTP server
     http.createServer(app).listen(DEVPORT, '0.0.0.0', () => {
