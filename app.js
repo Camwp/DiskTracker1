@@ -320,7 +320,7 @@ app.post('/login', (req, res) => {
             email: user.email,
             is_admin: user.is_admin === 1  // Assuming is_admin is a boolean field in the database
         };
-        req.session.userId = id;
+
         console.log('test', user.is_admin);
         if (remember) {
             req.session.cookie.maxAge = 90 * 24 * 60 * 60 * 1000;
