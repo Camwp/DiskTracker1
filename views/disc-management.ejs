@@ -131,18 +131,21 @@
                 <% if (discs && discs.length> 0) { %>
                     <% discs.forEach(disc=> { %>
                         <div class="row mb-2 border rounded p-2" style="cursor: pointer;" data-disc-id="<%= disc.id %>">
-                            <div class="col-md-3">
+                            <div class="col-md-5" style="display: flex;">
                                 <img src="<%= disc.imageUrl || '/uploads/defaultDiscImage.png' %>" alt="Disc Image"
                                     class="img-thumbnail" style="background-color: <%= disc.color %>;">
+                                <p class="textDetails"><strong style="display: none;">Manufacturer:</strong>
+                                    <strong style="margin-left: 1rem;">
+                                        <h4 style="align-content: center;">
+                                            <%= disc.manufacturer %>
+                                        </h4>
+                                    </strong>
+                                </p>
                             </div>
-                            <div class="col-md-9">
+                            <div class="col-md-7">
                                 <div class="row">
                                     <div class="col-md-4" id="textDetailsRow">
-                                        <p class="textDetails"><strong style="display: none;">Manufacturer:</strong>
-                                            <strong style="color: <%= disc.color %>;">
-                                                <%= disc.manufacturer %>
-                                            </strong>
-                                        </p>
+
                                         <p class="textDetails"><strong style="display: none;">Name:</strong>
                                             <%= disc.name %>
                                         </p>

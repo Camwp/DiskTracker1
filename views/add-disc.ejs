@@ -110,9 +110,8 @@
                     <input type="text" class="form-control" id="name" name="name" required>
                 </div>
                 <div class="mb-3">
-                    <label for="weight" class="form-label">Weight (<span id="weightValue">250</span> grams)</label>
-                    <input type="range" class="form-range" id="weight" name="weight" min="100" max="200" value="101"
-                        oninput="updateSliderValue(this.id, this.value)">
+                    <label for="weight" class="form-label">Weight (grams)</label>
+                    <input type="text" class="form-control" id="weight" name="weight" pattern="[0-9]*" required>
                 </div>
                 <div class=" mb-3">
                     <label for="plastic_type" class="form-label">Plastic/Model</label>
