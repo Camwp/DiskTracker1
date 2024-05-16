@@ -94,6 +94,17 @@ const initDb = () => {
             email TEXT NOT NULL UNIQUE,
             password TEXT NOT NULL,
             is_admin INTEGER DEFAULT 0
+            
+        )`);
+
+        db.run(`CREATE TABLE IF NOT EXISTS suggestions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            userId INTEGER NOT NULL,
+            username TEXT NOT NULL,
+            suggestion TEXT NOT NULL,
+            completed BOOL DEFAULT false,
+            FOREIGN KEY (userId) REFERENCES users (id),
+            FOREIGN KEY (username) REFERENCES users (username)
         )`);
 
         db.run(`CREATE TABLE IF NOT EXISTS discs (
@@ -246,6 +257,73 @@ app.get('/profile', checkAuthentication, (req, res) => {
     });
 });
 
+app.get('/suggestion', checkAuthentication, (req, res) => {
+    const userId = req.session.user.id;
+    let profileData = { user: req.session.user };
+
+    // Query to find the most checked-out disc
+    const favoriteDiscQuery = `
+        SELECT *, MAX(times_checked_out) AS most_checked_out
+        FROM discs
+        WHERE user_id = ?
+        GROUP BY id
+        ORDER BY most_checked_out DESC
+        LIMIT 1;
+    `;
+
+    const countDiscsQuery = `SELECT COUNT(*) AS discCount FROM discs WHERE user_id = ?`;
+    const countBagsQuery = `SELECT COUNT(*) AS bagCount FROM bags WHERE user_id = ?`;
+
+    // Using SQLite's sequential execution to handle multiple queries
+    db.serialize(() => {
+        db.get(favoriteDiscQuery, [userId], (err, favoriteDisc) => {
+            if (err) {
+                console.error("Database error when fetching favorite disc:", err);
+            } else {
+                profileData.favoriteDisc = favoriteDisc;
+            }
+
+            db.get(countDiscsQuery, [userId], (err, discs) => {
+                if (err) {
+                    console.error("Database error when counting discs:", err);
+                } else {
+                    profileData.discCount = discs.discCount;
+                }
+
+                db.get(countBagsQuery, [userId], (err, bags) => {
+                    if (err) {
+                        console.error("Database error when counting bags:", err);
+                    } else {
+                        profileData.bagCount = bags.bagCount;
+                    }
+
+
+                    // Render the profile page with all gathered data
+                    res.render('suggestion', profileData);
+                });
+            });
+        });
+    });
+});
+
+app.post('/submit-suggestion', (req, res) => {
+    const { suggestion } = req.body;
+    const username = req.session.user.username;
+    const userId = req.session.user.id;
+    console.log(username);
+    const sql = `INSERT INTO suggestions (username, userId, suggestion) 
+                 VALUES (?, ?, ?)`;
+    db.run(sql, [
+        username, userId, suggestion
+    ], function (err) {
+        if (err) {
+            console.error("Database error:", err.message);
+            res.status(500).send("Failed to add disc due to database error.");
+            return;
+        }
+        res.redirect('/suggestion');
+    });
+});
 
 
 app.get('/disc-management', checkAuthentication, (req, res) => {
@@ -699,6 +777,41 @@ app.get('/api/discs', (req, res) => {
     });
 });
 
+app.get('/api/suggestions', (req, res) => {
+    db.all('SELECT * FROM suggestions WHERE userId = ?', [req.session.user.id], (err, rows) => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+        console.log(req.session.userId);
+
+        const suggestions = rows.map(row => {
+            return {
+                suggestion: row.suggestion,
+                completed: row.completed === true
+            };
+        });
+        console.log(suggestions);
+
+        res.json(suggestions);
+    });
+});
+app.delete('/delete-suggestion', checkAuthentication, (req, res) => {
+    const text = req.query.text;
+    const userId = req.session.user.id;
+
+    const sql = `DELETE FROM suggestions WHERE suggestion = ? AND userId = ?`;
+    db.run(sql, [text, userId], function (err) {
+        if (err) {
+            console.error("Database error when removing suggestion:", err.message);
+
+            return res.status(500).json({ success: false, message: "Failed to remove suggestion due to database error." });
+        }
+
+        res.json({ success: true, message: "Suggestion removed successfully." });
+    });
+});
 
 
 

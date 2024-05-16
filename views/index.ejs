@@ -20,6 +20,10 @@
                     discs, update existing ones, and keep track of disc usage and availability. Dive into your disc
                     vault
                     journey now!</p>
+                <% if (user) { %>
+                    <a href="/suggestion"><button class="btn btn-primary">Leave a suggestion</button></a>
+
+                    <% } %>
             </div>
 
             <%- include('partials/footer') %>
