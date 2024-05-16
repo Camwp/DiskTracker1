@@ -7,6 +7,18 @@
     <title>Disc Details</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .btn-group .btn.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-group .btn.disabled.active {
+            background-color: #007bff;
+            color: white;
+            pointer-events: none;
+        }
+    </style>
 </head>
 
 <body>
@@ -60,7 +72,8 @@
                     margin: auto;
                 }
             </style>
-            <img src="<%= disc.imageUrl %>" style="cursor: pointer;  background-color: <%= disc.color %>;"
+            <img src="<%= disc.imageUrl %>"
+                style="cursor: pointer; margin: auto; display: flex;  background-color: <%= disc.color %>;"
                 alt="Disc Image" class="img-thumbnail" id="discImageDisplay">
             <input type="file" id="discImage" name="discImage" accept="image/*" style="display: none;">
             <button type="button" class="btn btn-primary" id="uploadImageButton" style="display: none;">Upload
@@ -70,7 +83,7 @@
             <button id="toggleCamera" type="button" class="btn btn-primary" style="display: none;" return false;>Toggle
                 Camera</button>
             <div id="cameraContainer" style="display: none;">
-                <video id="cameraFeed" playsinline></video>
+                <video id="cameraFeed" style="border-radius: 50%;" playsinline></video>
                 <div id="overlay"></div>
             </div>
             <button id="capturePhoto" type="button" class="btn btn-success" style="display: none;" return false;>Capture
@@ -124,14 +137,14 @@
                     <label for="name" class="form-label">Name</label>
                     <input type="text" class="form-control" id="name" name="name" value="<%= disc.name %>" required
                         disabled>
-                </div>
+                </div><!--
                 <div class="mb-3">
                     <label for="weight" class="form-label">Weight (<span id="weightValue">
                             <%= disc.weight %>
                         </span>)</label>
                     <input type="range" class="form-range" id="weight" name="weight" value="<%= disc.weight %>"
                         min="100" max="200" value="101" oninput="updateSliderValue(this.id, this.value)" disabled>
-                </div>
+                </div>-->
                 <div class=" mb-3">
                     <label for="plastic_type" class="form-label">Plastic Type</label>
                     <input type="text" class="form-control" id="plastic_type" name="plastic_type"
@@ -149,17 +162,13 @@
                         </option>
                     </select>
                 </div>
-
                 <div class="mb-3">
-                    <label for="stability">Stability</label>
-                    <select class="form-control" id="stability" name="stability" required disabled>
-                        <option value="Under-Stable" <%=disc.stability==='Under-Stable' ? 'selected' : '' %>
-                            >Under-Stable</option>
-                        <option value="Stable" <%=disc.stability==='Stable' ? 'selected' : '' %>>Stable</option>
-                        <option value="Over-Stable" <%=disc.stability==='Over-Stable' ? 'selected' : '' %>>Over-Stable
-                        </option>
-                    </select>
+                    <label for="weight" class="form-label">Weight (grams)</label>
+                    <input type="text" class="form-control" id="weight" name="weight" value="<%= disc.weight %>"
+                        pattern="[0-9]*" required>
                 </div>
+
+
                 <script>
                     document.addEventListener('DOMContentLoaded', function () {
                         const turnInput = document.getElementById('turn');
@@ -188,7 +197,7 @@
                         updateStability();
                     });
                 </script>
-                <div class="mb-3">
+                <!--<div class="mb-3">
                     <label for="speed" class="form-label">Speed (<span id="speedValue">
                             <%= disc.speed %>
                         </span>)</label>
@@ -220,12 +229,179 @@
                     <input type="range" class="form-range" id="fade" name="fade" min="0" max="5"
                         value="<%= disc.fade %>" oninput="updateSliderValue(this.id, this.value)" required disabled>
                 </div>
-                <!--
+                
                 <div class="mb-3">
                     <label for="color" class="form-label">Color</label>
                     <input type="color" class="form-control form-control-color" id="color" name="color"
                         value="<%= disc.color %>" required disabled>
                 </div>-->
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const speedButtons = document.querySelectorAll('#speedButtons button');
+                        const speedInput = document.getElementById('speed');
+
+                        speedButtons.forEach(button => {
+                            button.addEventListener('click', function () {
+                                // Set the value of the hidden input field to the clicked button's value
+                                speedInput.value = this.value;
+                                // Remove the 'active' class from all buttons
+                                speedButtons.forEach(btn => btn.classList.remove('active'));
+                                // Add the 'active' class to the clicked button
+                                this.classList.add('active');
+                            });
+                        });
+                    });
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const glideButtons = document.querySelectorAll('#glideButtons button');
+                        const glideInput = document.getElementById('glide');
+
+                        glideButtons.forEach(button => {
+                            button.addEventListener('click', function () {
+                                // Set the value of the hidden input field to the clicked button's value
+                                glideInput.value = this.value;
+                                // Remove the 'active' class from all buttons
+                                glideButtons.forEach(btn => btn.classList.remove('active'));
+                                // Add the 'active' class to the clicked button
+                                this.classList.add('active');
+                            });
+                        });
+                    });
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const turnButtons = document.querySelectorAll('#turnButtons button');
+                        const turnInput = document.getElementById('turn');
+
+                        turnButtons.forEach(button => {
+                            button.addEventListener('click', function () {
+                                // Set the value of the hidden input field to the clicked button's value
+                                turnInput.value = this.value;
+                                // Remove the 'active' class from all buttons
+                                turnButtons.forEach(btn => btn.classList.remove('active'));
+                                // Add the 'active' class to the clicked button
+                                this.classList.add('active');
+                            });
+                        });
+                    });
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const fadeButtons = document.querySelectorAll('#fadeButtons button');
+                        const fadeInput = document.getElementById('fade');
+
+                        fadeButtons.forEach(button => {
+                            button.addEventListener('click', function () {
+                                // Set the value of the hidden input field to the clicked button's value
+                                fadeInput.value = this.value;
+                                // Remove the 'active' class from all buttons
+                                fadeButtons.forEach(btn => btn.classList.remove('active'));
+                                // Add the 'active' class to the clicked button
+                                this.classList.add('active');
+                            });
+                        });
+                    });
+
+                </script>
+                <div class="mb-3">
+                    <label style="width: 100%;" for="speed">Speed</label>
+                    <div id="speedButtons" style="width: 100%;" class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-secondary <%=disc.speed===2 ? 'active'
+                            : '' %>" value="2">2</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.speed===3 ? 'active'
+                            : '' %>" value="3">3</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.speed===4 ? 'active'
+                            : '' %>" value="4">4</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.speed===5 ? 'active'
+                            : '' %>" value="5">5</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.speed===6 ? 'active'
+                            : '' %>" value="6">6</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.speed===7 ? 'active'
+                            : '' %>" value="7">7</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.speed===8 ? 'active'
+                            : '' %>" value="8">8</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.speed===9 ? 'active'
+                            : '' %>" value="9">9</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.speed===10 ? 'active'
+                            : '' %>" value="10">10</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.speed===11 ? 'active'
+                            : '' %>" value="11">11</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.speed===12 ? 'active'
+                            : '' %>" value="12">12</button>
+                    </div>
+                    <input type="hidden" id="speed" value="<%=disc.speed%>" name="speed">
+                </div>
+                <div class="mb-3">
+                    <label for="glide" style="width: 100%;">Glide</label>
+                    <div id="glideButtons" style="width: 100%;" class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-secondary <%=disc.glide===1 ? 'active'
+                            : '' %>" value="1">1</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.glide===2 ? 'active'
+                            : '' %>" value="2">2</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.glide===3 ? 'active'
+                            : '' %>" value="3">3</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.glide===4 ? 'active'
+                            : '' %>" value="4">4</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.glide===5 ? 'active'
+                            : '' %>" value="5">5</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.glide===6 ? 'active'
+                            : '' %>" value="6">6</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.glide===7 ? 'active'
+                            : '' %>" value="7">7</button>
+                    </div>
+                    <input type="hidden" id="glide" value="<%=disc.glide%>" name="glide">
+                </div>
+                <div class="mb-3">
+                    <label for="turn">Turn</label>
+                    <div id="turnButtons" style="width: 100%;" class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-secondary <%=disc.turn===-5 ? 'active'
+                            : '' %>" value="-5">-5</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.turn===-4 ? 'active'
+                            : '' %>" value="-4">-4</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.turn===-3 ? 'active'
+                            : '' %>" value="-3">-3</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.turn===-2 ? 'active'
+                            : '' %>" value="-2">-2</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.turn===-1 ? 'active'
+                            : '' %>" value="-1">-1</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.turn===0 ? 'active'
+                            : '' %>" value="0">0</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.turn===1 ? 'active'
+                            : '' %>" value="1">1</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.turn===2 ? 'active'
+                            : '' %>" value="2">2</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.turn===3 ? 'active'
+                            : '' %>" value="3">3</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.turn===4 ? 'active'
+                            : '' %>" value="4">4</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.turn===5 ? 'active'
+                            : '' %>" value="5">5</button>
+                    </div>
+                    <input type="hidden" id="turn" value="<%=disc.turn%>" name="turn">
+                </div>
+                <div class="mb-3">
+                    <label for="fade">Fade <%=disc.fade%></label>
+                    <div id="fadeButtons" style="width: 100%;" class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-secondary <%=disc.fade===0 ? 'active'
+                            : '' %>" value="3">0</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.fade===1 ? 'active'
+                            : '' %>" value="1">1</button>
+                        <button type="button" class="btn btn-outline-secondary  <%=disc.fade===2 ? 'active'
+                            : '' %>" value="2">2</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.fade===3 ? 'active'
+                            : '' %>" value="3">3</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.fade===4 ? 'active'
+                            : '' %>" value="4">4</button>
+                        <button type="button" class="btn btn-outline-secondary <%=disc.fade===5 ? 'active'
+                            : '' %>" value="5">5</button>
+                    </div>
+                    <input type="hidden" id="fade" value="<%=disc.fade%>" name="fade">
+                </div>
+                <div class="mb-3">
+                    <label for="stability">Stability</label>
+                    <select class="form-control" id="stability" name="stability" required disabled>
+                        <option value="Under-Stable" <%=disc.stability==='Under-Stable' ? 'selected' : '' %>
+                            >Under-Stable</option>
+                        <option value="Stable" <%=disc.stability==='Stable' ? 'selected' : '' %>>Stable</option>
+                        <option value="Over-Stable" <%=disc.stability==='Over-Stable' ? 'selected' : '' %>>Over-Stable
+                        </option>
+                    </select>
+                </div>
                 <div class="mb-3">
                     <label for="color" class="form-label">Color</label>
                     <select id="color" class="form-control" name="color" id="color">
@@ -260,11 +436,15 @@
                     </select>
                 </div>
 
-                <button type="button" class="btn btn-primary" id="editButton">Edit</button>
-                <button type="submit" class="btn btn-success" id="saveButton" style="display: none;">Save
+                <button type="button" class="btn btn-primary" id="editButton"
+                    style="width: 100%; margin: .5rem 0;">Edit</button>
+                <button type="submit" class="btn btn-success" id="saveButton"
+                    style="display: none; margin: .5rem 0; width: 100%;">Save
                     Changes</button>
-                <button type="button" class="btn btn-danger" onclick="removeDisc(<%= disc.id %>)"
-                    id="deleteButton">Delete</button>
+                <button type="button" class="btn btn-secondary" style="display: none; width: 100%; margin: .5rem 0;"
+                    onclick="cancelEditing()" id="cancelButton">Cancel</button>
+                <button type="button" class="btn btn-danger" style="display: none; width: 100%; margin: .5rem 0;"
+                    onclick="removeDisc(<%= disc.id %>)" id="deleteButton">Delete</button>
 
             </form>
         </div>
@@ -274,8 +454,12 @@
                 document.getElementById(id + 'Value').innerText = value;
             }
             document.getElementById('editButton').addEventListener('click', function () {
+                const cancelBtn = document.getElementById('cancelButton');
+                cancelBtn.style.display = 'block';
+                const delBtn = document.getElementById('deleteButton');
+                delBtn.style.display = 'block';
                 editable = true;
-                const formElements = document.querySelectorAll('#discDetailsForm input, #discDetailsForm select');
+                const formElements = document.querySelectorAll('#discDetailsForm input, #discDetailsForm select, .btn-outline-secondary');
                 formElements.forEach(element => {
                     // Check if the element's name is not 'stability'
                     if (element.name !== 'stability') {
@@ -288,8 +472,15 @@
                 document.getElementById('saveButton').style.display = 'block';
                 this.style.display = 'none';
             });
-            const formElements = document.querySelectorAll('#discDetailsForm input, #discDetailsForm select');
-            formElements.forEach(element => element.disabled = true);
+            function disableFormElements() {
+                const formElements = document.querySelectorAll('#discDetailsForm input, #discDetailsForm select, .btn-outline-secondary');
+                formElements.forEach(element => element.disabled = true);
+
+            }
+            disableFormElements();
+            function cancelEditing() {
+                location.reload();
+            }
 
             /*document.getElementById('discDetailsForm').addEventListener('submit', function (event) {
                 event.preventDefault();
@@ -549,6 +740,5 @@
 
         </script>
 </body>
-<%- include('partials/footer') %>
 
 </html>

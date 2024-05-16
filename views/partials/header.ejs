@@ -27,33 +27,34 @@
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a href="/" class="nav-link"><i class="fa-solid fa-house"></i> Home</a>
-                    </li>
-                    <% if (user) { %>
 
+                    <% if (user) { %>
+                        <li class="nav-item">
+                            <a href="/" class="nav-link"><i class="fa-solid fa-house"></i> Home</a>
+                        </li>
                         <li class="nav-item">
                             <a href="/disc-management" class="nav-link"><i class="fa-solid fa-flying-disc"></i>
                                 Discs</a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="/bag-management" class="nav-link"><i class="fa-solid fa-backpack"></i> Bags</a>
+                            <a href="/bag-management" class="nav-link"><i class="fa-solid fa-backpack"></i> Bag</a>
                         </li>
                         <li class="nav-item">
                             <a href="/profile" class="nav-link"><i class="fa-solid fa-user"></i> Profile</a>
                         </li>
                         <li class="nav-item">
-                            <a href="/logout" class="nav-link"><i class="fa-solid fa-right-from-bracket"></i>
-                                Logout</a>
+                            <a href="/logout" class="nav-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
                         </li>
                         <% if (user.is_admin) { %>
-                            <a href="/admin" class="nav-link"><i class="fa-solid fa-user-cog"></i> Admin</a>
+                            <li class="nav-item">
+                                <a href="/admin" class="nav-link"><i class="fa-solid fa-user-cog"></i> Admin</a>
+                            </li>
                             <% } %>
                                 <% } else { %>
                                     <!-- Modal Trigger Button -->
-                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                        data-bs-target="#authModal">
+                                    <button type="button" style="width: 100%; margin-top: .5rem;"
+                                        class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#authModal">
                                         Login / Register
                                     </button>
 

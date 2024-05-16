@@ -777,19 +777,49 @@ app.get('/api/discs', (req, res) => {
     });
 });
 
-app.get('/api/suggestions', (req, res) => {
-    db.all('SELECT * FROM suggestions WHERE userId = ?', [req.session.user.id], (err, rows) => {
+app.put('/api/suggestions/:id/toggle', (req, res) => {
+    const suggestionId = req.params.id;
+    if (!req.session.user.is_admin) {
+        return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const query = 'UPDATE suggestions SET completed = NOT completed WHERE id = ?';
+
+    db.run(query, [suggestionId], function (err) {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        res.json({ success: true });
+    });
+});
+
+
+app.get('/api/suggestions', checkAuthentication, (req, res) => {
+    let query = "";
+    let params = [];
+
+    if (req.session.user.is_admin) {
+        query = 'SELECT * FROM suggestions';
+    } else {
+        query = 'SELECT * FROM suggestions WHERE userId = ?';
+        params = [req.session.user.id];
+    }
+
+    console.log(query);
+    db.all(query, params.length ? params : [], (err, rows) => {
         if (err) {
             console.error(err.message);
             res.status(500).json({ error: 'Internal Server Error' });
             return;
         }
-        console.log(req.session.userId);
 
         const suggestions = rows.map(row => {
             return {
+                id: row.id,
+                username: row.username,
                 suggestion: row.suggestion,
-                completed: row.completed === true
+                completed: row.completed === 1
             };
         });
         console.log(suggestions);
@@ -797,6 +827,7 @@ app.get('/api/suggestions', (req, res) => {
         res.json(suggestions);
     });
 });
+
 app.delete('/delete-suggestion', checkAuthentication, (req, res) => {
     const text = req.query.text;
     const userId = req.session.user.id;

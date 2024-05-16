@@ -67,6 +67,19 @@
 
 
             <form action="/add-disc" method="POST" enctype="multipart/form-data">
+                <button id="toggleCamera" type="button" class="btn btn-primary" return false;>Toggle Camera</button>
+                <div id="cameraContainer" style="display: none;">
+                    <video id="cameraFeed" style="border-radius: 50%;" playsinline></video>
+                    <div id="overlay"></div>
+                </div>
+                <button id="capturePhoto" type="button" class="btn btn-success" style="display: none;" return
+                    false;>Capture
+                    Photo</button>
+                <canvas id="canvas" style="display: none;"></canvas>
+
+                <div class="mb-3" id="imagePreview" style="display: none; text-align: center;">
+                    <img src="" alt="Image Preview" id="imagePreviewSrc">
+                </div>
                 <div class="mb-3">
                     <label for="manufacturer" class="form-label">Manufacturer</label>
                     <input type="text" class="form-control" id="manufacturer" name="manufacturer" required>
@@ -109,10 +122,7 @@
                     <label for="name" class="form-label">Disc Name</label>
                     <input type="text" class="form-control" id="name" name="name" required>
                 </div>
-                <div class="mb-3">
-                    <label for="weight" class="form-label">Weight (grams)</label>
-                    <input type="text" class="form-control" id="weight" name="weight" pattern="[0-9]*" required>
-                </div>
+
                 <div class=" mb-3">
                     <label for="plastic_type" class="form-label">Plastic/Model</label>
                     <input type="text" class="form-control" id="plastic_type" name="plastic_type" required>
@@ -126,26 +136,131 @@
                         <option value="Distance Driver">Distance Driver</option>
                     </select>
                 </div>
+                <div class="mb-3">
+                    <label for="weight" class="form-label">Weight (grams)</label>
+                    <input type="text" class="form-control" id="weight" name="weight" pattern="[0-9]*" required>
+                </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const speedButtons = document.querySelectorAll('#speedButtons button');
+                        const speedInput = document.getElementById('speed');
 
+                        speedButtons.forEach(button => {
+                            button.addEventListener('click', function () {
+                                // Set the value of the hidden input field to the clicked button's value
+                                speedInput.value = this.value;
+                                // Remove the 'active' class from all buttons
+                                speedButtons.forEach(btn => btn.classList.remove('active'));
+                                // Add the 'active' class to the clicked button
+                                this.classList.add('active');
+                            });
+                        });
+                    });
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const glideButtons = document.querySelectorAll('#glideButtons button');
+                        const glideInput = document.getElementById('glide');
+
+                        glideButtons.forEach(button => {
+                            button.addEventListener('click', function () {
+                                // Set the value of the hidden input field to the clicked button's value
+                                glideInput.value = this.value;
+                                // Remove the 'active' class from all buttons
+                                glideButtons.forEach(btn => btn.classList.remove('active'));
+                                // Add the 'active' class to the clicked button
+                                this.classList.add('active');
+                            });
+                        });
+                    });
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const turnButtons = document.querySelectorAll('#turnButtons button');
+                        const turnInput = document.getElementById('turn');
+
+                        turnButtons.forEach(button => {
+                            button.addEventListener('click', function () {
+                                // Set the value of the hidden input field to the clicked button's value
+                                turnInput.value = this.value;
+                                // Remove the 'active' class from all buttons
+                                turnButtons.forEach(btn => btn.classList.remove('active'));
+                                // Add the 'active' class to the clicked button
+                                this.classList.add('active');
+                            });
+                        });
+                    });
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const fadeButtons = document.querySelectorAll('#fadeButtons button');
+                        const fadeInput = document.getElementById('fade');
+
+                        fadeButtons.forEach(button => {
+                            button.addEventListener('click', function () {
+                                // Set the value of the hidden input field to the clicked button's value
+                                fadeInput.value = this.value;
+                                // Remove the 'active' class from all buttons
+                                fadeButtons.forEach(btn => btn.classList.remove('active'));
+                                // Add the 'active' class to the clicked button
+                                this.classList.add('active');
+                            });
+                        });
+                    });
+
+                </script>
                 <div class="mb-3">
-                    <label for="speed">Speed (<span id="speedValue">1</span>)</label>
-                    <input type="range" class="form-range" id="speed" name="speed" min="1" max="14" value="1"
-                        oninput="updateSliderValue(this.id, this.value)">
+                    <label style="width: 100%;" for="speed">Speed</label>
+                    <div id="speedButtons" style="width: 100%;" class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-secondary" value="2">2</button>
+                        <button type="button" class="btn btn-outline-secondary" value="3">3</button>
+                        <button type="button" class="btn btn-outline-secondary" value="4">4</button>
+                        <button type="button" class="btn btn-outline-secondary" value="5">5</button>
+                        <button type="button" class="btn btn-outline-secondary" value="6">6</button>
+                        <button type="button" class="btn btn-outline-secondary" value="7">7</button>
+                        <button type="button" class="btn btn-outline-secondary" value="8">8</button>
+                        <button type="button" class="btn btn-outline-secondary" value="9">9</button>
+                        <button type="button" class="btn btn-outline-secondary" value="10">10</button>
+                        <button type="button" class="btn btn-outline-secondary" value="11">11</button>
+                        <button type="button" class="btn btn-outline-secondary" value="12">12</button>
+                    </div>
+                    <input type="hidden" id="speed" name="speed">
                 </div>
                 <div class="mb-3">
-                    <label for="glide">Glide (<span id="glideValue">1</span>)</label>
-                    <input type="range" class="form-range" id="glide" name="glide" min="1" max="7" value="1"
-                        oninput="updateSliderValue(this.id, this.value)">
+                    <label for="glide" style="width: 100%;">Glide</label>
+                    <div id="glideButtons" style="width: 100%;" class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-secondary" value="1">1</button>
+                        <button type="button" class="btn btn-outline-secondary" value="2">2</button>
+                        <button type="button" class="btn btn-outline-secondary" value="3">3</button>
+                        <button type="button" class="btn btn-outline-secondary" value="4">4</button>
+                        <button type="button" class="btn btn-outline-secondary" value="5">5</button>
+                        <button type="button" class="btn btn-outline-secondary" value="6">6</button>
+                        <button type="button" class="btn btn-outline-secondary" value="7">7</button>
+                    </div>
+                    <input type="hidden" id="glide" name="glide">
                 </div>
                 <div class="mb-3">
-                    <label for="turn">Turn (<span id="turnValue">-1</span>)</label>
-                    <input type="range" class="form-range" id="turn" name="turn" min="-5" max="1" value="-1"
-                        oninput="updateSliderValue(this.id, this.value)">
+                    <label for="turn">Turn</label>
+                    <div id="turnButtons" style="width: 100%;" class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-secondary" value="-5">-5</button>
+                        <button type="button" class="btn btn-outline-secondary" value="-4">-4</button>
+                        <button type="button" class="btn btn-outline-secondary" value="-3">-3</button>
+                        <button type="button" class="btn btn-outline-secondary" value="-2">-2</button>
+                        <button type="button" class="btn btn-outline-secondary" value="-1">-1</button>
+                        <button type="button" class="btn btn-outline-secondary" value="0">0</button>
+                        <button type="button" class="btn btn-outline-secondary" value="1">1</button>
+                        <button type="button" class="btn btn-outline-secondary" value="2">2</button>
+                        <button type="button" class="btn btn-outline-secondary" value="3">3</button>
+                        <button type="button" class="btn btn-outline-secondary" value="4">4</button>
+                        <button type="button" class="btn btn-outline-secondary" value="5">5</button>
+                    </div>
+                    <input type="hidden" id="turn" name="turn">
                 </div>
                 <div class="mb-3">
-                    <label for="fade">Fade (<span id="fadeValue">0</span>)</label>
-                    <input type="range" class="form-range" id="fade" name="fade" min="0" max="5" value="0"
-                        oninput="updateSliderValue(this.id, this.value)">
+                    <label for="fade">Fade</label>
+                    <div id="fadeButtons" style="width: 100%;" class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-secondary" value="3">0</button>
+                        <button type="button" class="btn btn-outline-secondary" value="1">1</button>
+                        <button type="button" class="btn btn-outline-secondary" value="2">2</button>
+                        <button type="button" class="btn btn-outline-secondary" value="3">3</button>
+                        <button type="button" class="btn btn-outline-secondary" value="4">4</button>
+                        <button type="button" class="btn btn-outline-secondary" value="5">5</button>
+                    </div>
+                    <input type="hidden" id="fade" name="fade">
                 </div>
                 <div class="mb-3">
                     <label for="stability">Stability</label>
@@ -184,6 +299,13 @@
                     });
                 </script>
 
+
+
+                <div class="mb-3" style="display: none;">
+                    <label for="discImage" class="form-label">Disc Image</label>
+                    <input type="file" class="form-control" id="discImage" name="discImage" onchange="previewImage();">
+                </div>
+
                 <div class="mb-3">
                     <label for="color" class="form-label">Color</label>
                     <select id="color" class="form-control" id="color" name="color">
@@ -199,25 +321,8 @@
                         <option value="#ffffff" style="background-color: #ffffff;">White</option>
                     </select>
                 </div>
-
-                <div class="mb-3" style="display: none;">
-                    <label for="discImage" class="form-label">Disc Image</label>
-                    <input type="file" class="form-control" id="discImage" name="discImage" onchange="previewImage();">
-                </div>
-                <button id="toggleCamera" type="button" class="btn btn-primary" return false;>Toggle Camera</button>
-                <div id="cameraContainer" style="display: none;">
-                    <video id="cameraFeed" playsinline></video>
-                    <div id="overlay"></div>
-                </div>
-                <button id="capturePhoto" type="button" class="btn btn-success" style="display: none;" return
-                    false;>Capture
-                    Photo</button>
-                <canvas id="canvas" style="display: none;"></canvas>
-
-                <div class="mb-3" id="imagePreview">
-                    <img src="" alt="Image Preview" id="imagePreviewSrc" style="max-width: 100%;">
-                </div>
-                <button type="submit" class="btn btn-success">Add Disc</button>
+                <button type="submit" style="width: 100%; margin-bottom: 3rem;" class="btn btn-success">Add
+                    Disc</button>
             </form>
         </div>
 
@@ -298,7 +403,7 @@
 
         </script>
 
-        <%- include('partials/footer') %>
+
 </body>
 <script>
     const cameraButton = document.getElementById('toggleCamera');
@@ -318,11 +423,17 @@
                     video.play();
                     document.getElementById('cameraContainer').style.display = 'block';
                     document.getElementById('capturePhoto').style.display = 'block';
+
+                    const photoPreview = document.getElementById('imagePreview');
+                    photoPreview.style.display = 'none';
+
                 }).catch(function (error) {
                     console.error("Error accessing the camera: ", error);
                     alert("Error accessing the camera: " + error.message);
                 });
         } else {
+            const photoPreview = document.getElementById('imagePreview');
+            photoPreview.style.display = 'block';
             video.pause();
             stream.getTracks().forEach(track => track.stop());
             stream = null;
@@ -333,6 +444,7 @@
 
     captureButton.onclick = () => {
         if (stream) {
+
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -352,10 +464,15 @@
                     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                     const color = colorAverage(imageData.data);
                     document.getElementById('color').value = color;
+                    const photoPreviewSrc = document.getElementById('imagePreviewSrc');
+                    const photoPreview = document.getElementById('imagePreview');
+                    photoPreviewSrc.src = img.src;
+                    photoPreview.style.display = 'block';
 
                 };
                 img.src = URL.createObjectURL(blob);
             }, 'image/png');
+
 
             cameraButton.click(); // Close the camera after capturing the photo
         }

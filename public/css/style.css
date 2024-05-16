@@ -179,14 +179,29 @@ body {
     max-width: 100%;
 }
 
-.card-img {
-    height: 100%;
+.navbar-nav {
+    flex-direction: row !important;
+}
+
+
+.navbar-nav .nav-item {
+    flex-grow: 1;
+    text-align: center;
+
+}
+
+
+
+.card-img,
+#imagePreviewSrc {
+    height: 300px;
+    width: 300px;
     object-fit: cover;
     border-radius: 50%;
 }
 
 .flightNumsItem1 {
-    border-radius: 10px 0px 0px 10px;
+    border-radius: 0px 0px 0px 10px;
 }
 
 .flightNumsItem {
@@ -194,7 +209,7 @@ body {
 }
 
 .flightNumsItem4 {
-    border-radius: 0px 10px 10px 0px;
+    border-radius: 0px 0px 10px 0px;
 }
 
 
@@ -219,5 +234,9 @@ body {
     .textDetails {
         display: grid;
         text-align: center;
+    }
+
+    .navbar-nav .nav-item .nav-link {
+        display: grid;
     }
 }

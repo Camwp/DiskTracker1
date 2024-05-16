@@ -33,35 +33,35 @@
                 <ul id="discList"></ul>
             </div>
         </div>
-        <%- include('partials/footer') %>
-            <script src="/js/bootstrap.bundle.min.js"></script>
-            <script>
-                document.getElementById('discSearch').addEventListener('input', function (e) {
-                    const searchValue = e.target.value;
-                    if (searchValue.length > 1) { // Start searching after 2 characters
-                        fetch(`/api/discs?search=${searchValue}`)
-                            .then(response => response.json())
-                            .then(discs => {
-                                const list = document.getElementById('discList');
-                                list.innerHTML = '';
-                                discs.forEach(disc => {
-                                    const item = document.createElement('li');
-                                    item.textContent = disc.name;
-                                    item.onclick = () => {
-                                        fetch(`/add-disc-to-bag`, {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify({ bagId: <%= bag.id %>, discId: disc.id })
-                                        }).then(() => {
-                                            window.location.reload(); // Reload to show new disc in bag
-                                        });
-                                    };
-                                    list.appendChild(item);
-                                });
+        <!--<%- include('partials/footer') %>-->
+        <script src="/js/bootstrap.bundle.min.js"></script>
+        <script>
+            document.getElementById('discSearch').addEventListener('input', function (e) {
+                const searchValue = e.target.value;
+                if (searchValue.length > 1) { // Start searching after 2 characters
+                    fetch(`/api/discs?search=${searchValue}`)
+                        .then(response => response.json())
+                        .then(discs => {
+                            const list = document.getElementById('discList');
+                            list.innerHTML = '';
+                            discs.forEach(disc => {
+                                const item = document.createElement('li');
+                                item.textContent = disc.name;
+                                item.onclick = () => {
+                                    fetch(`/add-disc-to-bag`, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ bagId: <%= bag.id %>, discId: disc.id })
+                                    }).then(() => {
+                                        window.location.reload(); // Reload to show new disc in bag
+                                    });
+                                };
+                                list.appendChild(item);
                             });
-                    }
-                });
-            </script>
+                        });
+                }
+            });
+        </script>
 </body>
 
 </html>
