@@ -49,28 +49,34 @@
                         <option value="#000000" style="background-color: #000000;">Black</option>
                         <option value="#ffffff" style="background-color: #ffffff;">White</option>
                     </select>
-<style>
-    select {
-    -webkit-appearance: none; /* Disable default appearance */
-    -moz-appearance: none;
-    appearance: none;
-    padding: 0.5rem; /* Add padding to make the dropdowns clickable */
-    background-color: transparent; /* Set a transparent background */
-    border: 1px solid #ccc; /* Add a border for better visibility */
-    border-radius: 4px; /* Optional: Add some border radius for a rounded look */
-}
+                    <style>
+                        select {
+                            -webkit-appearance: none;
+                            /* Disable default appearance */
+                            -moz-appearance: none;
+                            appearance: none;
+                            padding: 0.5rem;
+                            /* Add padding to make the dropdowns clickable */
+                            background-color: transparent;
+                            /* Set a transparent background */
+                            border: 1px solid #ccc;
+                            /* Add a border for better visibility */
+                            border-radius: 4px;
+                            /* Optional: Add some border radius for a rounded look */
+                        }
 
-/* Style the dropdown arrow */
-select::after {
-    content: '\25BC'; /* Unicode character for a down arrow */
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    pointer-events: none; /* Ensure the arrow doesn't interfere with clicking the dropdown */
-}
-
-</style>
+                        /* Style the dropdown arrow */
+                        select::after {
+                            content: '\25BC';
+                            /* Unicode character for a down arrow */
+                            position: absolute;
+                            top: 50%;
+                            right: 10px;
+                            transform: translateY(-50%);
+                            pointer-events: none;
+                            /* Ensure the arrow doesn't interfere with clicking the dropdown */
+                        }
+                    </style>
                 </div>
                 <div class="button-row mt-2">
                     <button id="applyFilters" class="btn btn-primary">Apply Filters</button>
@@ -132,20 +138,22 @@ select::after {
                             <div class="col-md-9">
                                 <div class="row">
                                     <div class="col-md-4" id="textDetailsRow">
-                                        <p class="textDetails"><strong>Manufacturer:</strong>
-                                            <%= disc.manufacturer %>
+                                        <p class="textDetails"><strong style="display: none;">Manufacturer:</strong>
+                                            <strong style="color: <%= disc.color %>;">
+                                                <%= disc.manufacturer %>
+                                            </strong>
                                         </p>
-                                        <p class="textDetails"><strong>Name:</strong>
+                                        <p class="textDetails"><strong style="display: none;">Name:</strong>
                                             <%= disc.name %>
                                         </p>
 
-                                        <p class="textDetails"><strong>Type:</strong>
+                                        <p class="textDetails"><strong style="display: none;">Type:</strong>
                                             <%= disc.disc_type %>
                                         </p>
-                                        <p class="textDetails"><strong>Plastic:</strong>
+                                        <p class="textDetails"><strong style="display: none;">Plastic:</strong>
                                             <%= disc.plastic_type %>
                                         </p>
-                                        <p class="textDetails"><strong>Weight:</strong>
+                                        <p class="textDetails"><strong style="display: none;">Weight:</strong>
                                             <%= disc.weight %> grams
                                         </p><!--
                                         <p><strong>Color:</strong> <span class="color-indicator"
@@ -153,7 +161,7 @@ select::after {
                                         </p>-->
                                     </div>
                                     <div class="col-md-4">
-                                        <p><strong>Stabilty:</strong>
+                                        <p><strong style="display: none;">Stabilty:</strong>
                                             <%= disc.stability %>
                                         </p>
                                         <div class="flightNums" style="display: flex; justify-content: space-between;">
