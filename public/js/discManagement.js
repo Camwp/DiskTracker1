@@ -18,13 +18,27 @@ document.getElementById('applyFilters').addEventListener('click', () => {
     const plastic = document.getElementById('filterPlastic').value;
     const type = document.getElementById('filterType').value;
     const color = document.getElementById('filterColor').value;
+    const stability = document.getElementById('filterStability').value;
+    const speed = document.getElementById('filterSpeed').value;
+    const glide = document.getElementById('filterGlide').value;
+    const turn = document.getElementById('filterTurn').value;
+    const fade = document.getElementById('filterFade').value;
+    const weightMin = document.getElementById('filterWeightMin').value;
+    const weightMax = document.getElementById('filterWeightMax').value;
 
     const query = new URLSearchParams();
 
     if (name.trim()) query.append('name', name.trim());
     if (plastic.trim()) query.append('plastic', plastic.trim());
     if (type) query.append('type', type);
-    if (color && color !== "#ffffff") query.append('color', color);  // Assuming "#ffffff" is the default for "All Colors"
+    if (color) query.append('color', color);
+    if (stability) query.append('stability', stability);
+    if (speed) query.append('speed', speed);
+    if (glide) query.append('glide', glide);
+    if (turn) query.append('turn', turn);
+    if (fade) query.append('fade', fade);
+    if (weightMin) query.append('weightMin', weightMin);
+    if (weightMax) query.append('weightMax', weightMax);
 
     window.location.href = `/disc-management?${query.toString()}`;
 });
@@ -49,7 +63,13 @@ document.getElementById('removeFilters').addEventListener('click', function () {
     document.getElementById('filterPlastic').value = '';
     document.getElementById('filterType').value = '';
     document.getElementById('filterColor').value = '';
-    // Optionally, you can reload the page to reset the filters
+    document.getElementById('filterStability').value = '';
+    document.getElementById('filterSpeed').value = '';
+    document.getElementById('filterGlide').value = '';
+    document.getElementById('filterTurn').value = '';
+    document.getElementById('filterFade').value = '';
+    document.getElementById('filterWeightMin').value = '';
+    document.getElementById('filterWeightMax').value = '';
     window.location.href = '/disc-management';
 });
 

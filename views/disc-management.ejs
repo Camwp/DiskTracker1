@@ -7,6 +7,34 @@
     <title>Disc Management</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        select {
+            -webkit-appearance: none;
+            /* Disable default appearance */
+            -moz-appearance: none;
+            appearance: none;
+            padding: 0.5rem;
+            /* Add padding to make the dropdowns clickable */
+            background-color: transparent;
+            /* Set a transparent background */
+            border: 1px solid #ccc;
+            /* Add a border for better visibility */
+            border-radius: 4px;
+            /* Optional: Add some border radius for a rounded look */
+        }
+
+        /* Style the dropdown arrow */
+        select::after {
+            content: '\25BC';
+            /* Unicode character for a down arrow */
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            pointer-events: none;
+            /* Ensure the arrow doesn't interfere with clicking the dropdown */
+        }
+    </style>
 </head>
 
 <body>
@@ -15,7 +43,7 @@
         <div class="container mt-3">
             <h1>Disc Management</h1>
             <div class="mb-3">
-                <button class="btn btn-primary" id="addDiscBtn">Add Disc</button>
+                <button class="btn btn-primary" id="addDiscBtn"><i class="fa-solid fa-plus"></i> Add Disc</button>
                 <button class="btn btn-secondary" id="bulkAddDiscBtn" style="display: none;">Add Bulk Discs</button>
             </div>
             <!-- Add a filter button in your HTML -->
@@ -49,34 +77,20 @@
                         <option value="#000000" style="background-color: #000000;">Black</option>
                         <option value="#ffffff" style="background-color: #ffffff;">White</option>
                     </select>
-                    <style>
-                        select {
-                            -webkit-appearance: none;
-                            /* Disable default appearance */
-                            -moz-appearance: none;
-                            appearance: none;
-                            padding: 0.5rem;
-                            /* Add padding to make the dropdowns clickable */
-                            background-color: transparent;
-                            /* Set a transparent background */
-                            border: 1px solid #ccc;
-                            /* Add a border for better visibility */
-                            border-radius: 4px;
-                            /* Optional: Add some border radius for a rounded look */
-                        }
-
-                        /* Style the dropdown arrow */
-                        select::after {
-                            content: '\25BC';
-                            /* Unicode character for a down arrow */
-                            position: absolute;
-                            top: 50%;
-                            right: 10px;
-                            transform: translateY(-50%);
-                            pointer-events: none;
-                            /* Ensure the arrow doesn't interfere with clicking the dropdown */
-                        }
-                    </style>
+                    <select id="filterStability" class="form-control">
+                        <option value="">All Stabilities</option>
+                        <option value="Understable">Understable</option>
+                        <option value="Stable">Stable</option>
+                        <option value="Overstable">Overstable</option>
+                    </select>
+                    <input type="number" id="filterSpeed" placeholder="Speed" class="form-control" min="1" max="14">
+                    <input type="number" id="filterGlide" placeholder="Glide" class="form-control" min="1" max="7">
+                    <input type="number" id="filterTurn" placeholder="Turn" class="form-control" min="-5" max="1">
+                    <input type="number" id="filterFade" placeholder="Fade" class="form-control" min="0" max="5">
+                    <input type="number" id="filterWeightMin" placeholder="Min Weight" class="form-control" min="100"
+                        max="200">
+                    <input type="number" id="filterWeightMax" placeholder="Max Weight" class="form-control" min="100"
+                        max="200">
                 </div>
                 <div class="button-row mt-2">
                     <button id="applyFilters" class="btn btn-primary">Apply Filters</button>

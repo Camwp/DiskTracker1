@@ -327,7 +327,7 @@ app.post('/submit-suggestion', (req, res) => {
 
 
 app.get('/disc-management', checkAuthentication, (req, res) => {
-    let { name, plastic, type, color, checkedOut } = req.query;
+    let { name, plastic, type, color, stability, speed, glide, turn, fade, weightMin, weightMax, checkedOut } = req.query;
     let sql = "SELECT * FROM discs WHERE user_id = ?";
     let params = [req.session.user.id];
 
@@ -356,10 +356,37 @@ app.get('/disc-management', checkAuthentication, (req, res) => {
             sql += " AND disc_type = ?";
             params.push(type);
         }
-
-        if (color && color !== "" && color !== "#ffffff") { // Assuming "#ffffff" is the default for "All Colors"
+        if (color && color !== "" && color !== "#ffffff") {
             sql += " AND color = ?";
             params.push(color);
+        }
+        if (stability && stability !== "") {
+            sql += " AND stability = ?";
+            params.push(stability);
+        }
+        if (speed && speed !== "") {
+            sql += " AND speed = ?";
+            params.push(speed);
+        }
+        if (glide && glide !== "") {
+            sql += " AND glide = ?";
+            params.push(glide);
+        }
+        if (turn && turn !== "") {
+            sql += " AND turn = ?";
+            params.push(turn);
+        }
+        if (fade && fade !== "") {
+            sql += " AND fade = ?";
+            params.push(fade);
+        }
+        if (weightMin && weightMin !== "") {
+            sql += " AND weight >= ?";
+            params.push(weightMin);
+        }
+        if (weightMax && weightMax !== "") {
+            sql += " AND weight <= ?";
+            params.push(weightMax);
         }
 
         db.all(sql, params, (err, discs) => {
@@ -371,6 +398,7 @@ app.get('/disc-management', checkAuthentication, (req, res) => {
         });
     });
 });
+
 
 
 
