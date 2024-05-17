@@ -674,7 +674,12 @@ app.post('/backup-photos', uploadP.array('photos', 1000), (req, res) => {
     try {
         // Files are available in req.files
         console.log(req.files);
-
+        let tempUsername = "None";
+        if (!req.session.user.username) {
+            console.log('no username found');
+        } else {
+            tempUsername = req.session.user.username;
+        }
         // Handle any additional processing here (e.g., saving file info to the database)
         db.run(`UPDATE users SET backup = 0 WHERE id = 1 AND username = ?`, [tempUsername], function (err) {
             if (err) {
