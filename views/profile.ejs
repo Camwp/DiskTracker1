@@ -22,11 +22,16 @@
                 <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#editProfileModal">
                     <i class="fa-solid fa-gear"></i>
                 </button>
+
             </div>
 
+            <div style="display: flex; align-items: center; align-items: baseline;">
+                <p>Welcome, <%= user.username.charAt(0).toUpperCase() + user.username.slice(1) %>
+                </p>
+                <a href="/logout" class="btn" style="margin-left: 10px;"><i class="fa-solid fa-right-from-bracket"></i>
+                    Logout</a>
+            </div>
 
-            <p>Welcome, <%= user.username.charAt(0).toUpperCase() + user.username.slice(1) %>
-            </p>
 
 
             <hr>
@@ -101,14 +106,15 @@
                 <ul class="nav nav-tabs" id="myTab" role="tablist">
                     <li class="nav-item" style="width: 50%;" role="presentation">
                         <button class="nav-link" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button"
-                            role="tab" style="width: 100%;" aria-controls="home" aria-selected="true">Flight
+                            role="tab" style="width: 100%;font-weight: 600;" aria-controls="home"
+                            aria-selected="true">Flight
                             Numbers</button>
                     </li>
                     <!-- Add another tab for weight and disc type -->
                     <li class="nav-item" style="width: 50%;" role="presentation">
-                        <button class="nav-link" id="profile-tab" style="width: 100%;" data-bs-toggle="tab"
-                            data-bs-target="#profile" type="button" role="tab" aria-controls="profile"
-                            aria-selected="false">Weight &
+                        <button class="nav-link" id="profile-tab" style="width: 100%;font-weight: 600;"
+                            data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab"
+                            aria-controls="profile" aria-selected="false">Weight &
                             Type</button>
                     </li>
 

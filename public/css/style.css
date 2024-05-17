@@ -101,6 +101,14 @@ a:focus {
     /* Navbar brand hover/focus color */
 }
 
+#myTab .nav-item .nav-link {
+    color: #2675b1 !important;
+}
+
+#myTab .nav-item .nav-link.active {
+    color: #000 !important;
+}
+
 /* Custom navbar background color */
 /* Custom Overrides for Bootstrap Colors */
 /* Adjust the hex values as needed to fit your color scheme */
