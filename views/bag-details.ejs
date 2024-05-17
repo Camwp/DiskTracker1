@@ -22,7 +22,7 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            width: 200px;
+            width: 175px;
             margin: 10px;
         }
 
@@ -57,22 +57,30 @@
                 <h2>Contents:</h2>
                 <div class="card-container">
                     <% discs.forEach(disc=> { %>
-                        <div class="card text-center">
-                            <img src="<%= disc.imageUrl || '/uploads/defaultDiscImage.png' %>" class="card-img-top"
-                                alt="Disc Image" style="background-color: <%= disc.color %>;">
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <%= disc.name %>
-                                </h5>
-                                <p class="card-text">
-                                    <%= disc.disc_type %>
-                                </p>
-                                <form action="/remove-disc-from-bag/<%= bag.id %>/<%= disc.id %>" method="post"
-                                    style="display: inline;">
-                                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
-                                </form>
+                        <a href="/disc-details/<%=disc.id%>" style="text-decoration: none;">
+                            <div class="card text-center">
+                                <img src="<%= disc.imageUrl || '/uploads/defaultDiscImage.png' %>" class="card-img-top"
+                                    alt="Disc Image" style="background-color: <%= disc.color %>;">
+
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <%= disc.name %>
+                                    </h5>
+                                    <p class="card-text">
+                                        <%= disc.stability %>
+                                    </p>
+                                    <p class="card-text">
+                                        <%= disc.disc_type %>
+                                    </p>
+                                    <form action="/remove-disc-from-bag/<%= bag.id %>/<%= disc.id %>" method="post"
+                                        style="display: inline;">
+                                        <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                                    </form>
+
+                                </div>
+
                             </div>
-                        </div>
+                        </a>
                         <% }); %>
                 </div>
                 <h3>Add Disc to Bag</h3>

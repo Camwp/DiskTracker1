@@ -21,12 +21,21 @@
                     vault
                     journey now!</p>
                 <% if (user) { %>
-                    <a href="/suggestion"><button class="btn btn-primary">Leave a suggestion</button></a>
+                    <div style="width: 100%; display: flex;">
+                        <a href="/disc-management" style="width: 33.3%; display: flex;"><button class="btn btn-primary"
+                                style="width: 100%; display: flex; justify-content: center;">Discs</button></a>
+                        <a href="/bag-management" style="width: 33.3%; display: flex;"><button class="btn btn-primary"
+                                style="width: 100%; display: flex; justify-content: center;">Bags</button></a>
+                        <a href="/profile" style="width: 33.3%; display: flex;"><button class="btn btn-primary"
+                                style="width: 100%; display: flex; justify-content: center;">Profile</button></a>
+                    </div>
+                    <hr>
+                    <a href="/suggestion"><button class="btn btn-secondary">Leave a suggestion</button></a>
 
                     <% } %>
             </div>
 
-            <%- include('partials/footer') %>
+            <!--<%- include('partials/footer') %>-->
 
 </body>
 
