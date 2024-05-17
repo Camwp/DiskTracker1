@@ -689,7 +689,13 @@ app.post('/backup-photos', uploadP.array('photos', 1000), (req, res) => {
 
 // New API endpoint to check backup status
 app.get('/check-backup-status', (req, res) => {
-    db.get(`SELECT backup FROM users WHERE id = 1 AND username = "cam"`, [], (err, row) => {
+    let tempUsername = "None";
+    if (!req.session.user.username) {
+        console.log('no username found');
+    } else {
+        tempUsername = req.session.user.username;
+    }
+    db.get(`SELECT backup FROM users WHERE id = 1 AND username = ?`, [tempUsername], (err, row) => {
         if (err) {
             console.error("Database error:", err.message);
             return res.status(500).json({ error: 'Database error' });
