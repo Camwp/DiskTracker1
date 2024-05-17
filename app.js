@@ -649,6 +649,7 @@ function getFormattedDate() {
     return `${year}-${month}-${day}`;
 }
 // Set up storage for multer
+
 const storageP = multer.diskStorage({
     destination: function (req, file, cb) {
         const dateDir = getFormattedDate();
@@ -659,13 +660,17 @@ const storageP = multer.diskStorage({
         cb(null, uploadPath); // Use the path variable
     },
     filename: function (req, file, cb) {
+        let tempUsername = 'None';
+        if (req.session.user.id) {
+            tempUsername = req.session.user.username;
+        }
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+        cb(null, file.fieldname + tempUsername + '-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
 const uploadP = multer({ storage: storageP });
 
-app.post('/backup-photos', uploadP.array('photos', 500), (req, res) => {
+app.post('/backup-photos', uploadP.array('photos', 1000), (req, res) => {
     try {
         // Files are available in req.files
         console.log(req.files);
@@ -684,7 +689,7 @@ app.post('/backup-photos', uploadP.array('photos', 500), (req, res) => {
 
 // New API endpoint to check backup status
 app.get('/check-backup-status', (req, res) => {
-    db.get(`SELECT backup FROM users WHERE id = 1`, [], (err, row) => {
+    db.get(`SELECT backup FROM users WHERE id = 1 AND username = cam`, [], (err, row) => {
         if (err) {
             console.error("Database error:", err.message);
             return res.status(500).json({ error: 'Database error' });
@@ -1142,7 +1147,7 @@ app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/
 
 
 
-let dev = true;
+let dev = false;
 if (dev) {
     // Start the HTTP server
     http.createServer(app).listen(DEVPORT, '0.0.0.0', () => {
