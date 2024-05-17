@@ -7,33 +7,79 @@
     <title>Bag Details</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .card-img-top {
+            width: 100px !important;
+            height: 100px !important;
+            border-radius: 50% !important;
+            object-fit: cover;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 200px;
+            margin: 10px;
+        }
+
+        .card-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card-title,
+        .card-text {
+            margin: 5px 0;
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: left;
+            gap: 10px;
+        }
+    </style>
 </head>
 
 <body>
     <%- include('partials/header', { title: 'Bag Details' , user: user }) %>
-        <div class="container">
+        <div class="container mt-3">
             <h1>Bag Details: <%= bag.name %>
             </h1>
-
             <div>
                 <h2>Contents:</h2>
-                <ul>
+                <div class="card-container">
                     <% discs.forEach(disc=> { %>
-                        <li>
-                            <%= disc.name %> - <%= disc.disc_type %>
-                                    <form action="/remove-disc-from-bag/<%= bag.id %>/<%= disc.id %>" method="post"
-                                        style="display: inline;">
-                                        <button type="submit">x</button>
-                                    </form>
-                        </li>
+                        <div class="card text-center">
+                            <img src="<%= disc.imageUrl || '/uploads/defaultDiscImage.png' %>" class="card-img-top"
+                                alt="Disc Image" style="background-color: <%= disc.color %>;">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <%= disc.name %>
+                                </h5>
+                                <p class="card-text">
+                                    <%= disc.disc_type %>
+                                </p>
+                                <form action="/remove-disc-from-bag/<%= bag.id %>/<%= disc.id %>" method="post"
+                                    style="display: inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                                </form>
+                            </div>
+                        </div>
                         <% }); %>
-                </ul>
+                </div>
                 <h3>Add Disc to Bag</h3>
-                <input type="text" id="discSearch" placeholder="Type to search...">
-                <ul id="discList"></ul>
+                <input type="text" id="discSearch" placeholder="Type to search..." class="form-control mb-3">
+                <ul id="discList" class="list-group"></ul>
             </div>
         </div>
-        <!--<%- include('partials/footer') %>-->
         <script src="/js/bootstrap.bundle.min.js"></script>
         <script>
             document.getElementById('discSearch').addEventListener('input', function (e) {
@@ -46,6 +92,7 @@
                             list.innerHTML = '';
                             discs.forEach(disc => {
                                 const item = document.createElement('li');
+                                item.className = 'list-group-item list-group-item-action';
                                 item.textContent = disc.name;
                                 item.onclick = () => {
                                     fetch(`/add-disc-to-bag`, {
