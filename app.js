@@ -665,7 +665,7 @@ const storageP = multer.diskStorage({
 });
 const uploadP = multer({ storage: storageP });
 
-app.post('/backup-photos', uploadP.array('photos', 1000), (req, res) => {
+app.post('/backup-photos', uploadP.array('photos', 500), (req, res) => {
     try {
         // Files are available in req.files
         console.log(req.files);
