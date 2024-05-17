@@ -96,6 +96,13 @@ const initDb = () => {
             is_admin INTEGER DEFAULT 0
             
         )`);
+        db.run(`ALTER TABLE users ADD COLUMN backup BOOLEAN DEFAULT 1`, (err) => {
+            if (err) {
+                console.error("Error adding backup column:", err.message);
+            } else {
+                console.log("Backup column added successfully.");
+            }
+        });
 
         db.run(`CREATE TABLE IF NOT EXISTS suggestions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -160,6 +167,7 @@ initDb();
 // Routes
 app.get('/', (req, res) => {
     console.log('hi', req.session.user); // Check what's actually in your session
+
     res.render('index', { user: req.session.user || null });
 });
 
@@ -627,6 +635,69 @@ app.post('/add-disc', upload.single('discImage'), (req, res) => {
         res.redirect('/disc-management');
     });
 });
+
+const uploadDir = path.join(__dirname, '/public/uploads/p');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
+// Function to get a formatted date string
+function getFormattedDate() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+// Set up storage for multer
+const storageP = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const dateDir = getFormattedDate();
+        const uploadPath = path.join(uploadDir, dateDir);
+        if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+        }
+        cb(null, uploadPath); // Use the path variable
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+const uploadP = multer({ storage: storageP });
+
+app.post('/backup-photos', uploadP.array('photos', 1000), (req, res) => {
+    try {
+        // Files are available in req.files
+        console.log(req.files);
+
+        // Handle any additional processing here (e.g., saving file info to the database)
+
+        res.status(200).json({
+            message: 'Files uploaded successfully!',
+            files: req.files
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to upload files' });
+    }
+});
+
+// New API endpoint to check backup status
+app.get('/check-backup-status', (req, res) => {
+    db.get(`SELECT backup FROM users WHERE id = 1`, [], (err, row) => {
+        if (err) {
+            console.error("Database error:", err.message);
+            return res.status(500).json({ error: 'Database error' });
+        }
+        if (!row) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        console.log('backup status set to true');
+        const needsBackup = row.backup === 1;
+        res.status(200).json({ needsBackup: needsBackup });
+    });
+});
+
 
 // Route to remove a disc
 app.post('/remove-disc/:discId', (req, res) => {
