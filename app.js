@@ -684,13 +684,7 @@ app.post('/backup-photos', uploadP.array('photos', 1000), (req, res) => {
         db.run(`UPDATE users SET backup = 0 WHERE username = ?`, [tempUsername], function (err) {
             if (err) {
                 console.error("Failed to update backup status:", err.message);
-                return res.status(500).json({ error: 'Failed to update backup status' });
             }
-
-            res.status(200).json({
-                message: 'Files uploaded successfully and backup status updated!',
-                files: req.files
-            });
         });
         res.status(200).json({
             message: 'Files uploaded successfully!',
