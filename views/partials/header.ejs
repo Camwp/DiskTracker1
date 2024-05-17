@@ -312,7 +312,7 @@
             }
 
             body {
-                padding-bottom: 70px;
+                padding-bottom: 60px;
                 /* Adjust this value if needed */
             }
         }
@@ -345,8 +345,8 @@
         <div class="container-fluid">
             <a class="navbar-brand" href="/"><i class="fa-solid fa-lock-keyhole"></i> <img src="/appimages/logo.png"
                     style="width: 200px;"></a>
-            <button class="navbar-toggler" type="button" aria-controls="navbarNav" aria-expanded="false"
-                aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -417,84 +417,130 @@
         </ul>
     </nav>
 
+    <!-- Authentication Modal -->
+    <div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="authModalLabel">Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Login Form -->
+                    <form id="loginForm" style="display: block;">
+                        <div class="mb-3">
+                            <label for="loginEmail" class="form-label">Email or Username</label>
+                            <input type="text" class="form-control" id="loginEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="loginPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" required>
+                        </div>
+                        <label>
+                            <input type="checkbox" name="remember"> Remember me
+                        </label>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </form>
+                    <!-- Registration Form (initially hidden) -->
+                    <form id="registerForm" action="/register" method="POST" style="display:none;">
+                        <div class="mb-3">
+                            <label for="registerUsername" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="registerUsername" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="registerEmail" class="form-label">Email address</label>
+                            <input type="email" class="form-control" id="registerEmail" name="email" required>
+                        </div>
+                        <div class="mb-3 position-relative">
+                            <label for="registerPassword" class="form-label">Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="registerPassword" name="password"
+                                    required>
+                                <button type="button" class="btn btn-outline-secondary" id="togglePassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mb-3 position-relative">
+                            <label for="registerPasswordConfirm" class="form-label">Confirm Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="registerPasswordConfirm"
+                                    name="passwordConfirm" required>
+                                <button type="button" class="btn btn-outline-secondary" id="togglePasswordConfirm">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div id="passwordMatchError" style="display:none; color:red;">Passwords do not match</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Register</button>
+                    </form>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const togglePassword = document.getElementById('togglePassword');
+                            const togglePasswordConfirm = document.getElementById('togglePasswordConfirm');
+                            const passwordField = document.getElementById('registerPassword');
+                            const passwordConfirmField = document.getElementById('registerPasswordConfirm');
+
+                            togglePassword.addEventListener('click', function () {
+                                const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                                passwordField.setAttribute('type', type);
+                                this.querySelector('i').classList.toggle('fa-eye-slash');
+                            });
+
+                            togglePasswordConfirm.addEventListener('click', function () {
+                                const type = passwordConfirmField.getAttribute('type') === 'password' ? 'text' : 'password';
+                                passwordConfirmField.setAttribute('type', type);
+                                this.querySelector('i').classList.toggle('fa-eye-slash');
+                            });
+                        });
+
+                        document.getElementById('registerForm').addEventListener('submit', function (event) {
+                            event.preventDefault();
+                            const password = document.getElementById('registerPassword').value;
+                            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+
+                            if (password !== passwordConfirm) {
+                                document.getElementById('passwordMatchError').style.display = 'block';
+                                return;
+                            }
+
+                            // If passwords match, submit the form
+                            this.submit();
+                        });
+
+                        document.getElementById('loginForm').addEventListener('submit', function (event) {
+                            event.preventDefault();
+                            const email = document.getElementById('loginEmail').value;
+                            const password = document.getElementById('loginPassword').value;
+                            const remember = document.querySelector('[name="remember"]').checked;
+
+                            fetch('/login', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ email: email, password: password, remember: remember })
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.error) {
+                                        alert(data.error);
+                                    } else {
+                                        window.location.href = data.redirect;
+                                    }
+                                })
+                                .catch(error => console.error('Error logging in:', error));
+                        });
+                    </script>
+                    <!-- Toggle Link -->
+                    <p class="text-center mt-4">
+                        <a href="#" id="toggleForm">Don't have an account? Sign up</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const toggleFormLink = document.getElementById('toggleForm');
-            const loginForm = document.getElementById('loginForm');
-            const registerForm = document.getElementById('registerForm');
-            const modalTitle = document.getElementById('authModalLabel');
-
-            toggleFormLink.addEventListener('click', function (event) {
-                event.preventDefault();
-                if (loginForm.style.display === 'block') {
-                    loginForm.style.display = 'none';
-                    registerForm.style.display = 'block';
-                    modalTitle.textContent = 'Register';
-                    toggleFormLink.textContent = 'Already have an account? Log in';
-                } else {
-                    loginForm.style.display = 'block';
-                    registerForm.style.display = 'none';
-                    modalTitle.textContent = 'Login';
-                    toggleFormLink.textContent = "Don't have an account? Sign up";
-                }
-            });
-
-            document.getElementById('loginForm').addEventListener('submit', function (event) {
-                event.preventDefault();
-                const email = document.getElementById('loginEmail').value;
-                const password = document.getElementById('loginPassword').value;
-                const remember = document.querySelector('[name="remember"]').checked;
-
-                fetch('/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email, password: password, remember: remember })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.error) {
-                            alert(data.error);
-                        } else {
-                            window.location.href = data.redirect;
-                        }
-                    })
-                    .catch(error => console.error('Error logging in:', error));
-            });
-
-            const togglePassword = document.getElementById('togglePassword');
-            const togglePasswordConfirm = document.getElementById('togglePasswordConfirm');
-            const passwordField = document.getElementById('registerPassword');
-            const passwordConfirmField = document.getElementById('registerPasswordConfirm');
-
-            togglePassword.addEventListener('click', function () {
-                const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordField.setAttribute('type', type);
-                this.querySelector('i').classList.toggle('fa-eye-slash');
-            });
-
-            togglePasswordConfirm.addEventListener('click', function () {
-                const type = passwordConfirmField.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordConfirmField.setAttribute('type', type);
-                this.querySelector('i').classList.toggle('fa-eye-slash');
-            });
-
-            document.getElementById('registerForm').addEventListener('submit', function (event) {
-                event.preventDefault();
-                const password = document.getElementById('registerPassword').value;
-                const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
-
-                if (password !== passwordConfirm) {
-                    document.getElementById('passwordMatchError').style.display = 'block';
-                    return;
-                }
-
-                // If passwords match, submit the form
-                this.submit();
-            });
-        });
-    </script>
 </body>
 
 </html>
