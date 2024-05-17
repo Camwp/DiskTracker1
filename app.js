@@ -942,16 +942,42 @@ app.get('/get-bags', checkAuthentication, (req, res) => {
 
 
 app.get('/bag-management', checkAuthentication, (req, res) => {
+    const userId = req.session.user.id;
     const sql = `SELECT * FROM bags WHERE user_id = ?`;
-    db.all(sql, [req.session.user.id], (err, bags) => {
+
+    db.all(sql, [userId], (err, bags) => {
         if (err) {
             console.error("Database error when fetching bags:", err);
-            res.render('error', { message: 'Failed to load bags.' });
-        } else {
-            res.render('bag-management', { user: req.session.user, bags: bags });
+            return res.render('error', { message: 'Failed to load bags.' });
         }
+
+        if (bags.length === 0) {
+            return res.render('bag-management', { user: req.session.user, bags: [] });
+        }
+
+        let bagsWithDiscs = [];
+        let completedRequests = 0;
+
+        bags.forEach(bag => {
+            const discsSql = `SELECT discs.* FROM discs JOIN discs_bags ON discs.id = discs_bags.disc_id WHERE discs_bags.bag_id = ?`;
+            db.all(discsSql, [bag.id], (err, discs) => {
+                if (err) {
+                    console.error("Database error when fetching discs in bag:", err);
+                    discs = [];
+                }
+
+                bag.discs = discs;
+                bagsWithDiscs.push(bag);
+                completedRequests++;
+
+                if (completedRequests === bags.length) {
+                    res.render('bag-management', { user: req.session.user, bags: bagsWithDiscs });
+                }
+            });
+        });
     });
 });
+
 
 app.get('/bag-details/:bagId', checkAuthentication, (req, res) => {
     const bagId = req.params.bagId;
@@ -1045,7 +1071,7 @@ app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/
 
 
 
-let dev = false;
+let dev = true;
 if (dev) {
     // Start the HTTP server
     http.createServer(app).listen(DEVPORT, '0.0.0.0', () => {

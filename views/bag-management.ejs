@@ -11,7 +11,6 @@
             position: relative;
             display: flex;
             flex-direction: column;
-
             margin: 10px;
             cursor: pointer;
             transition: transform 0.2s;
@@ -25,7 +24,6 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-
         }
 
         .card-title,
@@ -55,6 +53,20 @@
             color: red;
             cursor: pointer;
         }
+
+        .disc-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .disc-preview img {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
     </style>
 </head>
 
@@ -78,6 +90,12 @@
                                         <h5 class="card-title">
                                             <%= bag.name %>
                                         </h5>
+                                        <div class="disc-preview">
+                                            <% bag.discs.forEach(disc=> { %>
+                                                <img src="<%= disc.imageUrl || '/uploads/defaultDiscImage.png' %>"
+                                                    alt="<%= disc.name %>">
+                                                <% }); %>
+                                        </div>
                                         <div style="text-align: end;">
                                             <form action="/toggle-bag-checkout/<%= bag.id %>" method="post"
                                                 class="d-inline">
@@ -106,6 +124,12 @@
                                     <h5 class="card-title">
                                         <%= bag.name %>
                                     </h5>
+                                    <div class="disc-preview">
+                                        <% bag.discs.forEach(disc=> { %>
+                                            <img src="<%= disc.imageUrl || '/uploads/defaultDiscImage.png' %>"
+                                                alt="<%= disc.name %>">
+                                            <% }); %>
+                                    </div>
                                     <div style="text-align: end;">
                                         <form action="/toggle-bag-checkout/<%= bag.id %>" method="post"
                                             class="d-inline">
