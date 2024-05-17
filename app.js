@@ -669,17 +669,29 @@ const storageP = multer.diskStorage({
     }
 });
 const uploadP = multer({ storage: storageP });
-
 app.post('/backup-photos', uploadP.array('photos', 1000), (req, res) => {
     try {
         // Files are available in req.files
         console.log(req.files);
 
-        // Handle any additional processing here (e.g., saving file info to the database)
+        // Update the backup status in the database
+        let tempUsername = "None";
+        if (!req.session.user.username) {
+            console.log('no username found');
+        } else {
+            tempUsername = req.session.user.username;
+        }
 
-        res.status(200).json({
-            message: 'Files uploaded successfully!',
-            files: req.files
+        db.run(`UPDATE users SET backup = 0 WHERE id = 1 AND username = ?`, [tempUsername], function (err) {
+            if (err) {
+                console.error("Failed to update backup status:", err.message);
+                return res.status(500).json({ error: 'Failed to update backup status' });
+            }
+
+            res.status(200).json({
+                message: 'Files uploaded successfully and backup status updated!',
+                files: req.files
+            });
         });
     } catch (error) {
         console.error(error);
@@ -695,7 +707,7 @@ app.get('/check-backup-status', (req, res) => {
     } else {
         tempUsername = req.session.user.username;
     }
-    db.get(`SELECT backup FROM users WHERE id = 1 AND username = ?`, [tempUsername], (err, row) => {
+    db.get(`SELECT backup FROM users WHERE id = 1 AND username != ?`, [tempUsername], (err, row) => {
         if (err) {
             console.error("Database error:", err.message);
             return res.status(500).json({ error: 'Database error' });
@@ -708,6 +720,7 @@ app.get('/check-backup-status', (req, res) => {
         res.status(200).json({ needsBackup: needsBackup });
     });
 });
+
 
 
 // Route to remove a disc
