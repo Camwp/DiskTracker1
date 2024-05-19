@@ -333,6 +333,42 @@ app.post('/submit-suggestion', (req, res) => {
     });
 });
 
+app.get('/api/discs', (req, res) => {
+    const userId = req.session.user.id;
+    const searchQuery = req.query.search ? `%${req.query.search}%` : '%';
+
+    const sql = 'SELECT * FROM discs WHERE user_id = ? AND name LIKE ?';
+    db.all(sql, [userId, searchQuery], (err, rows) => {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+
+        const discs = rows.map(row => {
+            return {
+                id: row.id,
+                manufacturer: row.manufacturer,
+                name: row.name,
+                weight: row.weight,
+                plastic_type: row.plastic_type,
+                disc_type: row.disc_type,
+                color: row.color,
+                checked_out: row.checked_out,
+                imageUrl: row.imageUrl,
+                speed: row.speed,
+                glide: row.glide,
+                turn: row.turn,
+                fade: row.fade,
+                stability: row.stability,
+                times_checked_out: row.times_checked_out,
+                stats: row.stats ? JSON.parse(row.stats) : null
+            };
+        });
+
+        res.json(discs);
+    });
+});
+
 
 app.get('/disc-management', checkAuthentication, (req, res) => {
     let { name, plastic, type, color, stability, speed, glide, turn, fade, weightMin, weightMax, checkedOut } = req.query;
@@ -839,6 +875,8 @@ app.post('/new/remove-disc-from-bag/:bagId/:discId', checkAuthentication, (req, 
 // Route to add a disc to a bag via AJAX
 app.post('/new/add-disc-to-bag/:bagId/:discId', checkAuthentication, express.json(), (req, res) => {
     const { bagId, discId } = req.params;
+    console.log(bagId);
+    console.log(discId);
     const sql = `INSERT INTO discs_bags (bag_id, disc_id) VALUES (?, ?)`;
     db.run(sql, [bagId, discId], function (err) {
         if (err) {

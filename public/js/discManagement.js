@@ -201,7 +201,7 @@ function addDiscToBag(event) {
     event.preventDefault(); // Prevent default form submission behavior
 
     const selectedBagId = event.target.parentElement.querySelector('.bag-option').value;
-    const discId = event.target.closest('.row').getAttribute('data-disc-id');
+    const discId = event.target.closest('.row').dataset.discId; // Access the dataset to get the discId
 
     // Perform the action to add or remove the disc from the selected bag
     fetch(`/new/add-disc-to-bag/${selectedBagId}/${discId}`, {
@@ -223,16 +223,17 @@ function addDiscToBag(event) {
 }
 
 
+
 function getSelectedDiscId() {
     // Implement this function to get the ID of the selected disc
     // For example, you can use data attributes or other methods to store the disc ID in the HTML
 }
 
-
 function showBagList(event) {
     event.preventDefault(); // Prevent default form submission behavior
 
-    const discId = document.querySelector('.addToBagBtn').getAttribute('data-disc-id');
+    // Get the discId from the button that triggers the modal
+    const discId = event.target.getAttribute('data-disc-id');
 
     fetch('/get-bags')
         .then(response => {
@@ -279,6 +280,7 @@ function showBagList(event) {
             alert('Failed to fetch bags');
         });
 }
+
 
 function addToBag(dId, bagId) {
 
