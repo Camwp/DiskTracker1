@@ -142,6 +142,7 @@
                 </div>
                 <script>
                     document.addEventListener('DOMContentLoaded', function () {
+
                         const speedButtons = document.querySelectorAll('#speedButtons button');
                         const speedInput = document.getElementById('speed');
 
@@ -174,7 +175,22 @@
                     document.addEventListener('DOMContentLoaded', function () {
                         const turnButtons = document.querySelectorAll('#turnButtons button');
                         const turnInput = document.getElementById('turn');
+                        const stabilitySelect = document.getElementById('stability');
+                        const fadeInput = document.getElementById('fade');
 
+                        function updateStability() {
+                            const turn = parseInt(turnInput.value, 10);
+                            const fade = parseInt(fadeInput.value, 10);
+                            const stability = turn + fade;
+
+                            if (stability < 0) {
+                                stabilitySelect.value = 'Under-Stable';
+                            } else if (stability > 0) {
+                                stabilitySelect.value = 'Over-Stable';
+                            } else {
+                                stabilitySelect.value = 'Stable';
+                            }
+                        }
                         turnButtons.forEach(button => {
                             button.addEventListener('click', function () {
                                 // Set the value of the hidden input field to the clicked button's value
@@ -183,10 +199,27 @@
                                 turnButtons.forEach(btn => btn.classList.remove('active'));
                                 // Add the 'active' class to the clicked button
                                 this.classList.add('active');
+                                updateStability();
                             });
                         });
                     });
                     document.addEventListener('DOMContentLoaded', function () {
+                        const turnInput = document.getElementById('turn');
+                        const stabilitySelect = document.getElementById('stability');
+
+                        function updateStability() {
+                            const turn = parseInt(turnInput.value, 10);
+                            const fade = parseInt(fadeInput.value, 10);
+                            const stability = turn + fade;
+
+                            if (stability < 0) {
+                                stabilitySelect.value = 'Under-Stable';
+                            } else if (stability > 0) {
+                                stabilitySelect.value = 'Over-Stable';
+                            } else {
+                                stabilitySelect.value = 'Stable';
+                            }
+                        }
                         const fadeButtons = document.querySelectorAll('#fadeButtons button');
                         const fadeInput = document.getElementById('fade');
 
@@ -198,6 +231,7 @@
                                 fadeButtons.forEach(btn => btn.classList.remove('active'));
                                 // Add the 'active' class to the clicked button
                                 this.classList.add('active');
+                                updateStability();
                             });
                         });
                     });
@@ -253,7 +287,7 @@
                 <div class="mb-3">
                     <label for="fade">Fade</label>
                     <div id="fadeButtons" style="width: 100%;" class="btn-group" role="group">
-                        <button type="button" class="btn btn-outline-secondary" value="3">0</button>
+                        <button type="button" class="btn btn-outline-secondary" value="0">0</button>
                         <button type="button" class="btn btn-outline-secondary" value="1">1</button>
                         <button type="button" class="btn btn-outline-secondary" value="2">2</button>
                         <button type="button" class="btn btn-outline-secondary" value="3">3</button>
@@ -270,33 +304,33 @@
                         <option value="Over-Stable">Over-Stable</option>
                     </select>
                 </div>
-                <script>
-                    document.addEventListener('DOMContentLoaded', function () {
-                        const turnInput = document.getElementById('turn');
-                        const fadeInput = document.getElementById('fade');
-                        const stabilitySelect = document.getElementById('stability');
+                <script>/*
+    document.addEventListener('DOMContentLoaded', function () {
+        const turnInput = document.getElementById('turn');
+        const fadeInput = document.getElementById('fade');
+        const stabilitySelect = document.getElementById('stability');
 
-                        function updateStability() {
-                            const turn = parseInt(turnInput.value, 10);
-                            const fade = parseInt(fadeInput.value, 10);
-                            const stability = turn + fade;
+        function updateStability() {
+            const turn = parseInt(turnInput.value, 10);
+            const fade = parseInt(fadeInput.value, 10);
+            const stability = turn + fade;
 
-                            if (stability < 0) {
-                                stabilitySelect.value = 'Under-Stable';
-                            } else if (stability > 0) {
-                                stabilitySelect.value = 'Over-Stable';
-                            } else {
-                                stabilitySelect.value = 'Stable';
-                            }
-                        }
+            if (stability < 0) {
+                stabilitySelect.value = 'Under-Stable';
+            } else if (stability > 0) {
+                stabilitySelect.value = 'Over-Stable';
+            } else {
+                stabilitySelect.value = 'Stable';
+            }
+        }
 
-                        // Call updateStability whenever the 'turn' or 'fade' value changes
-                        turnInput.addEventListener('input', updateStability);
-                        fadeInput.addEventListener('input', updateStability);
+        // Call updateStability whenever the 'turn' or 'fade' value changes
+        turnInput.addEventListener('input', updateStability);
+        fadeInput.addEventListener('input', updateStability);
 
-                        // Initialize stability on page load
-                        updateStability();
-                    });
+        // Initialize stability on page load
+        updateStability();
+    });*/
                 </script>
 
 

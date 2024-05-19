@@ -87,12 +87,12 @@ document.querySelectorAll('.checkout-btn').forEach(button => {
                 if (data.success) {
                     this.textContent = this.textContent.trim() === 'Check Out' ? 'Check In' : 'Check Out';
                 } else {
-                    alert('Failed to update disc status.');
+                    //alert('Failed to update disc status.');
                 }
             })
             .catch(error => {
                 console.error('Error updating disc status:', error);
-                alert('Error updating disc status.');
+                //alert('Error updating disc status.');
             });
     });
 });
@@ -183,14 +183,14 @@ function removeFromBag(event) {
         .then(response => response.text())
         .then(data => {
             // Assuming the server returns a success message
-            alert(data);
+            //alert(data);
             // Optionally, you can update the button text after successful removal
             //event.target.textContent = 'Add to Bag';
             location.reload();
         })
         .catch(error => {
             console.error('Error removing disc from bag:', error);
-            alert('Error removing disc from bag.');
+            // alert('Error removing disc from bag.');
         });
 }
 
@@ -211,14 +211,14 @@ function addDiscToBag(event) {
         .then(data => {
             if (data.success) {
                 updateButtonText(event.target.parentElement); // Update button text after action
-                alert('Disc action successful.');
+                //alert('Disc action successful.');
             } else {
-                alert('Failed to perform disc action.');
+                //alert('Failed to perform disc action.');
             }
         })
         .catch(error => {
             console.error('Error performing disc action:', error);
-            alert('Error performing disc action.');
+            //alert('Error performing disc action.');
         });
 }
 
@@ -293,14 +293,14 @@ function addToBag(dId, bagId) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Disc action successful.');
+                //alert('Disc action successful.');
             } else {
-                alert('Failed to perform disc action.');
+                //alert('Failed to perform disc action.');
             }
         })
         .catch(error => {
             console.error('Error performing disc action:', error);
-            alert('Error performing disc action.');
+            //alert('Error performing disc action.');
         });
 }
 

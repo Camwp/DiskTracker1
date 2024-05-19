@@ -316,7 +316,7 @@ app.get('/suggestion', checkAuthentication, (req, res) => {
 
 app.post('/submit-suggestion', (req, res) => {
     const { suggestion } = req.body;
-    const username = req.session.user.username;
+    const username = req.session.user.username.toLowerCase();
     const userId = req.session.user.id;
     console.log(username);
     const sql = `INSERT INTO suggestions (username, userId, suggestion) 
@@ -948,11 +948,11 @@ app.get('/api/suggestions', checkAuthentication, (req, res) => {
 });
 
 app.delete('/delete-suggestion', checkAuthentication, (req, res) => {
-    const text = req.query.text;
+    const id = req.query.id;
     const userId = req.session.user.id;
-
-    const sql = `DELETE FROM suggestions WHERE suggestion = ? AND userId = ?`;
-    db.run(sql, [text, userId], function (err) {
+    console.log(id)
+    const sql = `DELETE FROM suggestions WHERE id = ? AND userId = ?`;
+    db.run(sql, [id, userId], function (err) {
         if (err) {
             console.error("Database error when removing suggestion:", err.message);
 
@@ -1162,7 +1162,7 @@ app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/
 
 
 
-let dev = false;
+let dev = true;
 if (dev) {
     // Start the HTTP server
     http.createServer(app).listen(DEVPORT, '0.0.0.0', () => {
