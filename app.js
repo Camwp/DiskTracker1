@@ -851,50 +851,31 @@ app.post('/new/add-disc-to-bag/:bagId/:discId', checkAuthentication, express.jso
 // Route to add a disc to a bag via AJAX
 app.post('/add-disc-to-bag', checkAuthentication, express.json(), (req, res) => {
     const { bagId, discId } = req.body;
-    const sql = `INSERT INTO discs_bags (bag_id, disc_id) VALUES (?, ?)`;
-    db.run(sql, [bagId, discId], function (err) {
+
+    // Check if the combination of disc_id and bag_id already exists
+    const checkSql = `SELECT * FROM discs_bags WHERE bag_id = ? AND disc_id = ?`;
+    db.get(checkSql, [bagId, discId], (err, row) => {
         if (err) {
-            console.error("Database error when adding disc to bag:", err.message);
+            console.error("Database error:", err.message);
             return res.status(500).json({ error: "Failed to add disc to bag due to database error." });
         }
-        res.json({ success: true, message: "Disc added to bag successfully" });
-    });
-});
-
-app.get('/api/discs', (req, res) => {
-    db.all('SELECT * FROM discs WHERE user_id = ?', [req.session.user.id], (err, rows) => {
-        if (err) {
-            console.error(err.message);
-            res.status(500).json({ error: 'Internal Server Error' });
-            return;
+        if (row) {
+            // Combination already exists, return an error
+            return res.status(400).json({ error: "Disc already exists in the bag." });
+        } else {
+            // Combination doesn't exist, proceed with the insertion
+            const insertSql = `INSERT INTO discs_bags (bag_id, disc_id) VALUES (?, ?)`;
+            db.run(insertSql, [bagId, discId], function (err) {
+                if (err) {
+                    console.error("Database error:", err.message);
+                    return res.status(500).json({ error: "Failed to add disc to bag due to database error." });
+                }
+                res.json({ success: true, message: "Disc added to bag successfully" });
+            });
         }
-        console.log(req.session.userId);
-
-        const discs = rows.map(row => {
-            return {
-                id: row.id,
-                manufacturer: row.manufacturer,
-                name: row.name,
-                weight: row.weight,
-                plastic_type: row.plastic_type,
-                disc_type: row.disc_type,
-                color: row.color,
-                checked_out: row.checked_out,
-                imageUrl: row.imageUrl,
-                speed: row.speed,
-                glide: row.glide,
-                turn: row.turn,
-                fade: row.fade,
-                stability: row.stability,
-                times_checked_out: row.times_checked_out,
-                stats: JSON.parse(row.stats)
-            };
-        });
-        console.log(discs);
-
-        res.json(discs);
     });
 });
+
 
 app.put('/api/suggestions/:id/toggle', (req, res) => {
     const suggestionId = req.params.id;
