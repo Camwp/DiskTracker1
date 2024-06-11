@@ -529,6 +529,27 @@
                                 })
                                 .catch(error => console.error('Error logging in:', error));
                         });
+                        document.addEventListener("DOMContentLoaded", function () {
+            const toggleFormLink = document.getElementById('toggleForm');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const modalTitle = document.getElementById('authModalLabel');
+
+            toggleFormLink.addEventListener('click', function (event) {
+                event.preventDefault();
+                if (loginForm.style.display === 'block') {
+                    loginForm.style.display = 'none';
+                    registerForm.style.display = 'block';
+                    modalTitle.textContent = 'Register';
+                    toggleFormLink.textContent = 'Already have an account? Log in';
+                } else {
+                    loginForm.style.display = 'block';
+                    registerForm.style.display = 'none';
+                    modalTitle.textContent = 'Login';
+                    toggleFormLink.textContent = "Don't have an account? Sign up";
+                }
+            });
+        });
                     </script>
                     <!-- Toggle Link -->
                     <p class="text-center mt-4">
