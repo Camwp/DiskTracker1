@@ -848,8 +848,9 @@ app.get('/check-backup-status', (req, res) => {
         if (!row) {
             return res.status(404).json({ error: 'User not found' });
         }
-        console.log('backup status set to true');
+        
         const needsBackup = row.backup === 1;
+        console.log(`backup status set to ${needsBackup}`);
         res.status(200).json({ needsBackup: needsBackup });
     });
 });
@@ -1281,7 +1282,7 @@ app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/
 
 
 
-let dev = true;
+let dev = false;
 if (dev) {
     // Start the HTTP server
     http.createServer(app).listen(DEVPORT, '0.0.0.0', () => {
