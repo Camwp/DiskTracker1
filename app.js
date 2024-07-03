@@ -788,20 +788,20 @@ function getFormattedDate() {
 
 const storageP = multer.diskStorage({
     destination: function (req, file, cb) {
-        const dateDir = getFormattedDate();
+        const dateDir = getFormattedDateTime();
         const uploadPath = path.join(uploadDir, dateDir);
         if (!fs.existsSync(uploadPath)) {
             fs.mkdirSync(uploadPath, { recursive: true });
         }
-        cb(null, uploadPath); // Use the path variable
+        cb(null, uploadPath);
     },
     filename: function (req, file, cb) {
         let tempUsername = 'None';
-        if (req.session.user.id) {
+        if (req.session.user && req.session.user.username) {
             tempUsername = req.session.user.username;
         }
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + tempUsername + '-' + uniqueSuffix + path.extname(file.originalname));
+        cb(null, file.fieldname + '-' + tempUsername + '-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
 const uploadP = multer({ storage: storageP });
@@ -848,7 +848,7 @@ app.get('/check-backup-status', (req, res) => {
         if (!row) {
             return res.status(404).json({ error: 'User not found' });
         }
-        
+
         const needsBackup = row.backup === 1;
         console.log(`backup status set to ${needsBackup}`);
         res.status(200).json({ needsBackup: needsBackup });
