@@ -786,6 +786,15 @@ function getFormattedDate() {
 }
 // Set up storage for multer
 
+const fileFilter = (req, file, cb) => {
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/quicktime'];
+    if (allowedMimeTypes.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Invalid file type. Only JPEG, PNG, GIF, MP4, and MOV files are allowed.'), false);
+    }
+};
+
 const storageP = multer.diskStorage({
     destination: function (req, file, cb) {
         const dateDir = getFormattedDate();
@@ -804,16 +813,17 @@ const storageP = multer.diskStorage({
         cb(null, file.fieldname + '-' + tempUsername + '-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
-const uploadP = multer({ storage: storageP });
+const uploadP = multer({
+    storage: storageP,
+    fileFilter: fileFilter,
+    limits: { fileSize: 1000 * 1024 * 1024 } // 1000 MB file size limit
+});
 
-app.post('/backup-photos', uploadP.array('photos', 1000), (req, res) => {
+app.post('/backup-photos', uploadP.array('photos', 5000), (req, res) => {
     try {
-        // Files are available in req.files
         console.log(req.files);
         let tempUsername = "None";
-        if (!req.session.user.username) {
-            console.log('no username found');
-        } else {
+        if (req.session.user && req.session.user.username) {
             tempUsername = req.session.user.username;
         }
         // Handle any additional processing here (e.g., saving file info to the database)
