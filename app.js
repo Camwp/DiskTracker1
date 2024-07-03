@@ -788,7 +788,7 @@ function getFormattedDate() {
 
 const storageP = multer.diskStorage({
     destination: function (req, file, cb) {
-        const dateDir = getFormattedDateTime();
+        const dateDir = getFormattedDate();
         const uploadPath = path.join(uploadDir, dateDir);
         if (!fs.existsSync(uploadPath)) {
             fs.mkdirSync(uploadPath, { recursive: true });
