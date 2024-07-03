@@ -15,11 +15,18 @@ const uploadPath = './public/uploads';
 const csv = require('csv-parse');
 const https = require('https');
 const http = require('http');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 
 
 
-
-
+const transporter = nodemailer.createTransport({
+    service: 'gmail', // You can use any email service
+    auth: {
+        user: 'stokesociety916@gmail.com',
+        pass: 'brhl gdzz yead pqxh '
+    }
+});
 
 
 
@@ -159,6 +166,28 @@ const initDb = () => {
             if (err) console.error(err.message);
             else console.log('Tables created or already exist.');
         });
+        db.run(`ALTER TABLE users ADD COLUMN reset_password_token TEXT`, (err) => {
+            if (err) {
+                if (err.message.includes('duplicate column name')) {
+                    console.log("reset_password_token column already exists.");
+                } else {
+                    console.error("Error adding reset_password_token column:", err.message);
+                }
+            } else {
+                console.log("reset_password_token column added successfully.");
+            }
+        });
+        db.run(`ALTER TABLE users ADD COLUMN reset_password_expires INTEGER`, (err) => {
+            if (err) {
+                if (err.message.includes('duplicate column name')) {
+                    console.log("reset_password_expires column already exists.");
+                } else {
+                    console.error("Error adding reset_password_expires column:", err.message);
+                }
+            } else {
+                console.log("reset_password_expires column added successfully.");
+            }
+        });
     });
 };
 
@@ -169,6 +198,77 @@ app.get('/', (req, res) => {
     console.log('hi', req.session.user); // Check what's actually in your session
 
     res.render('index', { user: req.session.user || null });
+});
+
+
+app.post('/request-password-reset', (req, res) => {
+    const email = req.body.email;
+
+    // Generate a token
+    const token = crypto.randomBytes(20).toString('hex');
+
+    // Set token expiration time (1 hour)
+    const tokenExpiration = Date.now() + 3600000;
+
+    const sql = `UPDATE users SET reset_password_token = ?, reset_password_expires = ? WHERE email = ?`;
+    db.run(sql, [token, tokenExpiration, email], function (err) {
+        if (err) {
+            console.error("Database error:", err.message);
+            res.status(500).send("Failed to process password reset request.");
+            return;
+        }
+
+        // Send password reset email
+        const mailOptions = {
+            to: email,
+            from: 'stokesociety916@gmail.com',
+            subject: 'Password Reset',
+            text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n` +
+                `Please click on the following link, or paste this into your browser to complete the process within one hour of receiving it:\n\n` +
+                `http://${req.headers.host}/reset-password/${token}\n\n` +
+                `If you did not request this, please ignore this email and your password will remain unchanged.\n`
+        };
+
+        transporter.sendMail(mailOptions, (err) => {
+            if (err) {
+                console.error("Email sending error:", err.message);
+                res.status(500).send("Failed to send password reset email.");
+                return;
+            }
+            res.send("Password reset email sent successfully.");
+        });
+    });
+});
+
+app.get('/reset-password/:token', (req, res) => {
+    const token = req.params.token;
+
+    const sql = `SELECT * FROM users WHERE reset_password_token = ? AND reset_password_expires > ?`;
+    db.get(sql, [token, Date.now()], (err, user) => {
+        if (err || !user) {
+            return res.status(400).send("Password reset token is invalid or has expired.");
+        }
+        res.render('reset-password', { token: token });
+    });
+});
+
+app.post('/reset-password/:token', (req, res) => {
+    const token = req.params.token;
+    const password = req.body.password;
+
+    bcrypt.hash(password, 10, (err, hashedPassword) => {
+        if (err) {
+            return res.status(500).send("Failed to reset password.");
+        }
+
+        const sql = `UPDATE users SET password = ?, reset_password_token = NULL, reset_password_expires = NULL WHERE reset_password_token = ?`;
+        db.run(sql, [hashedPassword, token], function (err) {
+            if (err) {
+                return res.status(500).send("Failed to reset password.");
+            }
+            res.send("Password has been reset successfully.");
+        });
+    });
 });
 
 
@@ -1181,7 +1281,7 @@ app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/
 
 
 
-let dev = false;
+let dev = true;
 if (dev) {
     // Start the HTTP server
     http.createServer(app).listen(DEVPORT, '0.0.0.0', () => {

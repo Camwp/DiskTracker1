@@ -440,7 +440,28 @@
                             <input type="checkbox" name="remember"> Remember me
                         </label>
                         <button type="submit" class="btn btn-primary">Login</button>
+                        <p class="text-center mt-4">
+                            <a href="#" id="togglePasswordResetForm">Forgot password?</a>
+                        </p>
+
+                        <script>
+                            document.getElementById('togglePasswordResetForm').addEventListener('click', function (event) {
+                                event.preventDefault();
+                                document.getElementById('loginForm').style.display = 'none';
+                                document.getElementById('passwordResetRequestForm').style.display = 'block';
+                            });
+                        </script>
                     </form>
+                    <!-- Password Reset Request Form -->
+                    <form id="passwordResetRequestForm" action="/request-password-reset" method="POST"
+                        style="display:none;">
+                        <div class="mb-3">
+                            <label for="resetEmail" class="form-label">Email address</label>
+                            <input type="email" class="form-control" id="resetEmail" name="email" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Request Password Reset</button>
+                    </form>
+
                     <!-- Registration Form (initially hidden) -->
                     <form id="registerForm" action="/register" method="POST" style="display:none;">
                         <div class="mb-3">
@@ -491,6 +512,28 @@
                                 const type = passwordConfirmField.getAttribute('type') === 'password' ? 'text' : 'password';
                                 passwordConfirmField.setAttribute('type', type);
                                 this.querySelector('i').classList.toggle('fa-eye-slash');
+                            });
+                        });
+
+                        document.addEventListener("DOMContentLoaded", function () {
+                            const toggleFormLink = document.getElementById('toggleForm');
+                            const loginForm = document.getElementById('loginForm');
+                            const registerForm = document.getElementById('registerForm');
+                            const modalTitle = document.getElementById('authModalLabel');
+
+                            toggleFormLink.addEventListener('click', function (event) {
+                                event.preventDefault();
+                                if (loginForm.style.display === 'block') {
+                                    loginForm.style.display = 'none';
+                                    registerForm.style.display = 'block';
+                                    modalTitle.textContent = 'Register';
+                                    toggleFormLink.textContent = 'Already have an account? Log in';
+                                } else {
+                                    loginForm.style.display = 'block';
+                                    registerForm.style.display = 'none';
+                                    modalTitle.textContent = 'Login';
+                                    toggleFormLink.textContent = "Don't have an account? Sign up";
+                                }
                             });
                         });
 
