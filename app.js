@@ -802,28 +802,27 @@ const storageP = multer.diskStorage({
         if (!fs.existsSync(uploadPath)) {
             fs.mkdirSync(uploadPath, { recursive: true });
         }
-        cb(null, uploadPath);
+        cb(null, uploadPath); // Use the path variable
     },
     filename: function (req, file, cb) {
         let tempUsername = 'None';
-        if (req.session.user && req.session.user.username) {
+        if (req.session.user.id) {
             tempUsername = req.session.user.username;
         }
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + tempUsername + '-' + uniqueSuffix + path.extname(file.originalname));
+        cb(null, file.fieldname + tempUsername + '-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
-const uploadP = multer({
-    storage: storageP,
-    fileFilter: fileFilter,
-    limits: { fileSize: 1000 * 1024 * 1024 } // 1000 MB file size limit
-});
+const uploadP = multer({ storage: storageP });
 
-app.post('/backup-photos', uploadP.array('photos', 5000), (req, res) => {
+app.post('/backup-photos', uploadP.array('photos', 1000), (req, res) => {
     try {
+        // Files are available in req.files
         console.log(req.files);
         let tempUsername = "None";
-        if (req.session.user && req.session.user.username) {
+        if (!req.session.user.username) {
+            console.log('no username found');
+        } else {
             tempUsername = req.session.user.username;
         }
         // Handle any additional processing here (e.g., saving file info to the database)
